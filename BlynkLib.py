@@ -60,8 +60,10 @@ class Protocol(object):
     MSG_EVENT_LOG = 64
     # MSG_REDIRECT = 41  # TODO: not implemented
     # MSG_DBG_PRINT = 55  # TODO: not implemented
+    MSG_HEAD_LEN = 5
     STATUS_SUCCESS = 200
     HEARTBEAT_PERIOD = 10
+    MAX_CMD_BUFFER = 1024
 
     _vr_pins = {}
     _msg_id = 1
@@ -74,13 +76,24 @@ class Protocol(object):
         data = ('\0'.join([str(curr_arg) for curr_arg in args])).encode('ascii')
         return struct.pack('!BHH', msg_type, self._get_msg_id(), len(data)) + data
 
-    @staticmethod
-    def parse_response(data):
-        return struct.unpack('!BHH', data)
+    def parse_response(self, rsp_data, expected_msg_type=None):
+        msg_type, msg_id, h_data = struct.unpack('!BHH', rsp_data[:self.MSG_HEAD_LEN])
+        if msg_id == 0:
+            raise BlynkException('invalid msg_id == 0')
+        elif h_data >= self.MAX_CMD_BUFFER:
+            raise BlynkException('Command too long. Length = {}'.format(h_data))
+        elif expected_msg_type is not None and msg_type != expected_msg_type:
+            raise BlynkException('Not expected msg_type={} captured'.format(msg_type))
+        elif msg_type in (self.MSG_RSP, self.MSG_PING, self.MSG_HW, self.MSG_BRIDGE, self.MSG_INTERNAL):
+            pass
+        else:
+            raise BlynkException('Unknown message type received "{}"'.format(msg_type))
+        extra_data = rsp_data[self.MSG_HEAD_LEN: self.MSG_HEAD_LEN + h_data]
+        return msg_type, msg_id, h_data, extra_data
 
     def heartbeat_msg(self):
-        return self._pack_msg(self.MSG_INTERNAL, 'ver', VERSION, 'buff-in', 4096, 'h-beat', self.HEARTBEAT_PERIOD,
-                              'dev', sys.platform + '-py')
+        return self._pack_msg(self.MSG_INTERNAL, 'ver', VERSION, 'buff-in', self.MAX_CMD_BUFFER, 'h-beat',
+                              self.HEARTBEAT_PERIOD, 'dev', sys.platform + '-py')
 
     def login_msg(self, token):
         return self._pack_msg(self.MSG_LOGIN, token)
@@ -132,7 +145,6 @@ class Connection(Protocol):
     CONNECTION_TIMEOUT = 0.05
     RETRIES_TX_DELAY = 2
     RETRIES_TX_MAX_NUM = 3
-    MSG_HEAD_LEN = 5
     IDLE_TIME_MS = 5
     TASK_PERIOD_RES = 50  # 50ms
     CONNECT_CALL_TIMEOUT = 30  # 30sec
@@ -209,21 +221,28 @@ class Connection(Protocol):
             idle()
         return start_time + delay
 
+    # todo add invalid auth token STA_INVALID_TOKEN =(9)
     def _authenticate(self):
         print('Authenticating device...')
         self.state = self.STATE_AUTHENTICATING
         self.send(self.login_msg(self.token))
-        rsp_data = self.receive(self.MSG_HEAD_LEN, timeout=self.SOCK_MAX_TIMEOUT)
+        rsp_data = self.receive(self.MAX_CMD_BUFFER, timeout=self.SOCK_MAX_TIMEOUT)
         if not rsp_data:
             raise BlynkException('Blynk authentication timed out')
-        msg_type, msg_id, status = self.parse_response(rsp_data)
-        if status != self.STATUS_SUCCESS or msg_id == 0:
+        msg_type, msg_id, status, _ = self.parse_response(rsp_data, expected_msg_type=self.MSG_RSP)
+        if status != self.STATUS_SUCCESS:
             raise BlynkException('Blynk authentication failed')
         self.state = self.STATE_AUTHENTICATED
         print('Access granted.')
 
     def _set_heartbeat(self):
         self.send(self.heartbeat_msg())
+        rsp_data = self.receive(self.MAX_CMD_BUFFER, timeout=self.SOCK_MAX_TIMEOUT)
+        if not rsp_data:
+            raise BlynkException('Heartbeat reply timeout')
+        msg_type, msg_id, status, _ = self.parse_response(rsp_data, expected_msg_type=self.MSG_RSP)
+        if status != self.STATUS_SUCCESS:
+            raise BlynkException('Heartbeat operation status= {}'.format(status))
         print("Heartbeat period = {} seconds. Happy Blynking!".format(self.HEARTBEAT_PERIOD))
 
     def connect(self, timeout=CONNECT_CALL_TIMEOUT):
@@ -314,34 +333,32 @@ class Blynk(Connection):
         return self.send(self.virtual_read_msg(v_pin))
 
     # todo think about name
-    def process(self, msg_type, msg_id, msg_len):
-        try:
-            if msg_id == 0:
-                raise BlynkException('invalid msg id {}'.format(msg_id))
-            # TODO: check length
-            elif msg_type == self.MSG_RSP:
-                pass
-            elif msg_type == self.MSG_PING:
-                self.send(self.ping_reply_msg(msg_id, self.STATUS_SUCCESS))
-            elif msg_type in (self.MSG_HW, self.MSG_BRIDGE):
-                rsp_data = self.receive(msg_len, self.SOCK_MIN_TIMEOUT)
-                if rsp_data:
-                    # todo here put real logic
-                    # self._handle_hw(rsp_data)
-                    print('Captured data {}'.format(rsp_data))
-            elif msg_type == self.MSG_INTERNAL:  # TODO: other message types?
-                pass
-            else:
-                raise BlynkException('Unknown message type received "{}"'.format(msg_type))
-        except BlynkException as b_exc:
-            self.disconnect(b_exc)
+    def process(self, msg_type, msg_id, msg_len, extra_data):
+        if msg_type == self.MSG_RSP:
+            # todo add status handling maybe
+            print(msg_len)
+        elif msg_type == self.MSG_PING:
+            self.send(self.ping_reply_msg(msg_id, self.STATUS_SUCCESS))
+        elif msg_type in (self.MSG_HW, self.MSG_BRIDGE):
+            if extra_data:
+                # todo here put real logic
+                print('Captured data {}'.format(extra_data))
+                # self._handle_hw(rsp_data)
+        elif msg_type == self.MSG_INTERNAL:
+            pass
 
-    # todo connect will be changed
+    # todo remove this description for run
+    # Blynk.run()
+    #
+    # This function should be called frequently to process incoming commands
+    # and perform housekeeping of Blynk connection. It is usually called in void loop() {}.
+
     def run(self):
         self._start_time = time_ms()
         self._last_receive_time = self._start_time
         self._last_send_time = self._start_time
         self._last_ping_time = self._start_time
+        # todo out queue and input queues
         # todo add keyboard interrupt
         while True:
             self.connect()
@@ -350,8 +367,8 @@ class Blynk(Connection):
                     rsp_data = self.receive(self.MSG_HEAD_LEN, self.SOCK_NON_BLOCK_TIMEOUT)
                     self._last_receive_time = time_ms()
                     if rsp_data:
-                        msg_type, msg_id, msg_len = self.parse_response(rsp_data)
-                        self.process(msg_type, msg_id, msg_len)
+                        msg_type, msg_id, h_data, extra_data = self.parse_response(rsp_data)
+                        self.process(msg_type, msg_id, h_data, extra_data)
                     else:
                         self._start_time = self.sleep_from_until(self._start_time, self.IDLE_TIME_MS)
                     if not self.is_server_alive():
@@ -362,6 +379,7 @@ class Blynk(Connection):
                     self.disconnect(g_exc)
 
 
+# todo remove this test block after all
 if __name__ == "__main__":
     with open('TOKEN.txt') as t_file:
         auth_t = t_file.readline().strip()
