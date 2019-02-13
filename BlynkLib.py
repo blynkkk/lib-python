@@ -7,24 +7,27 @@ import sys
 VERSION = '0.2.1'
 # todo change globally logging
 
-try:
-    from machine import idle
+for itm in ('from machine import idle', 'getattr(time, "ticks_ms")'):
+    try:
+        exec itm
+    except ImportError:
+        idle = lambda: 0
+        continue
+    except AttributeError:
+        ticks_ms = lambda: int(time.time() * 1000)
+        sleep_ms = lambda x: time.sleep(x // 1000)
+        ticks_diff = lambda x, y: y - x
 
-except ImportError:
-    def idle():
-        pass
-
-
-def time_ms():
-    return getattr(time, 'ticks_ms', lambda: int(time.time() * 1000))()
-
-
-def sleep_ms(ms):
-    return getattr(time, 'sleep_ms', lambda x: time.sleep(x // 1000))(ms)
-
-
-def time_diff_ms(start_t, end_t):
-    return getattr(time, 'ticks_diff', lambda x, y: y - x)(start_t, end_t)
+# def time_ms():
+#     return getattr(time, 'ticks_ms', lambda: int(time.time() * 1000))()
+#
+#
+# def sleep_ms(ms):
+#     return getattr(time, 'sleep_ms', lambda x: time.sleep(x // 1000))(ms)
+#
+#
+# def time_diff_ms(start_t, end_t):
+#     return getattr(time, 'ticks_diff', lambda x, y: y - x)(start_t, end_t)
 
 
 LOGO = """
@@ -145,7 +148,7 @@ class Connection(Protocol):
     CONNECTION_TIMEOUT = 0.05
     RETRIES_TX_DELAY = 2
     RETRIES_TX_MAX_NUM = 3
-    IDLE_TIME_MS = 5
+    IDLE_TIME_MS = 20
     TASK_PERIOD_RES = 50  # 50ms
     CONNECT_CALL_TIMEOUT = 30  # 30sec
 
@@ -164,7 +167,7 @@ class Connection(Protocol):
         curr_retry_num = 0
         while curr_retry_num <= self.RETRIES_TX_MAX_NUM:
             try:
-                self._last_send_time = time_ms()
+                self._last_send_time = ticks_ms()
                 return self.socket.send(data)
             except (socket.error, socket.timeout):
                 sleep_ms(self.RETRIES_TX_DELAY)
@@ -187,7 +190,7 @@ class Connection(Protocol):
             raise
 
     def is_server_alive(self):
-        now = time_ms()
+        now = ticks_ms()
         heartbeat_ms = self.HEARTBEAT_PERIOD * 1000
         receive_delta = now - self._last_receive_time
         ping_delta = now - self._last_ping_time
@@ -214,10 +217,10 @@ class Connection(Protocol):
         except Exception as g_exc:
             raise BlynkException('Connection with the Blynk servers failed: {}'.format(g_exc))
 
-    # todo rename and think about time methods ticks_ms
-    @staticmethod
-    def sleep_from_until(start_time, delay):
-        while time_diff_ms(start_time, time_ms()) < delay:
+    # todo maybe remove
+    def wait(self, start_time, delay):
+        while ticks_diff(start_time, ticks_ms()) < delay:
+            #sleep_ms(self.IDLE_TIME_MS)
             idle()
         return start_time + delay
 
@@ -354,7 +357,7 @@ class Blynk(Connection):
     # and perform housekeeping of Blynk connection. It is usually called in void loop() {}.
 
     def run(self):
-        self._start_time = time_ms()
+        self._start_time = ticks_ms()
         self._last_receive_time = self._start_time
         self._last_send_time = self._start_time
         self._last_ping_time = self._start_time
@@ -365,12 +368,15 @@ class Blynk(Connection):
             while self.connected():
                 try:
                     rsp_data = self.receive(self.MSG_HEAD_LEN, self.SOCK_NON_BLOCK_TIMEOUT)
-                    self._last_receive_time = time_ms()
+                    self._last_receive_time = ticks_ms()
                     if rsp_data:
                         msg_type, msg_id, h_data, extra_data = self.parse_response(rsp_data)
                         self.process(msg_type, msg_id, h_data, extra_data)
                     else:
-                        self._start_time = self.sleep_from_until(self._start_time, self.IDLE_TIME_MS)
+                        #time.sleep(self.IDLE_TIME_MS//1000)
+                        #sleep_ms(self.IDLE_TIME_MS)
+                        #self._start_time = self._start_time + self.IDLE_TIME_MS
+                        self._start_time = self.wait(self._start_time, self.IDLE_TIME_MS)
                     if not self.is_server_alive():
                         self.disconnect('Blynk server is offline')
                         break
