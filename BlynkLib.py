@@ -1,4 +1,5 @@
-# Copyright (c) 2015-2019  Blynk
+# Copyright (c) 2015-2019 Volodymyr Shymanskyy. See the file LICENSE for copying permission.
+# Copyright (c) 2019 Anton Morozenko
 import socket
 import struct
 import time
