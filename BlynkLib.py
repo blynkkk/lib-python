@@ -317,7 +317,7 @@ class Blynk(Connection):
         return Decorator
 
     def call_handler(self, event, *args, **kwargs):
-        print("Event: ['{}'] -> {}".format(event, args[1]))
+        print("Event: ['{}'] -> {}".format(event, args))
         if event in self.events.keys():
             self.events[event](*args, **kwargs)
 
