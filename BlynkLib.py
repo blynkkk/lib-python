@@ -298,6 +298,7 @@ class Blynk(Connection):
         return self.send(self.virtual_write_msg(v_pin, *val))
 
     def virtual_sync(self, *v_pin):
+        # todo change description
         """
         Sync virtual pin/pins to get actual data. For HW this is equal to read data from virtual pin/pins operation
         @param v_pin: single pin or multiple pins number
