@@ -13,8 +13,8 @@ VERSION = '0.2.2'
 # todo print list of registered events
 # todo add to examples config call with logger
 # todo notification event
-# todo  on connect event
-# todo on disconnect event
+# todo tweet call
+# todo notify call
 # todo MSG_REDIRECT = 41 ??
 # todo MSG_DBG_PRINT = 55 ??
 # todo add debug response statuses parse operation
@@ -115,8 +115,15 @@ class Protocol(object):
     def virtual_write_msg(self, v_pin, *val):
         return self._pack_msg(self.MSG_HW, 'vw', v_pin, *val)
 
+    # todo check multiple values support
     def virtual_sync_msg(self, *pins):
         return self._pack_msg(self.MSG_HW_SYNC, 'vr', *pins)
+
+    def email_msg(self, to, subject, body):
+        return self._pack_msg(self.MSG_EMAIL, to, subject, body)
+
+    def notify_msg(self, msg):
+        return self._pack_msg(self.MSG_NOTIFY, msg)
 
 
 class Connection(Protocol):
@@ -317,13 +324,22 @@ class Blynk(Connection):
         return self.send(self.virtual_write_msg(v_pin, *val))
 
     def virtual_sync(self, *v_pin):
-        # todo change description
         """
         Sync virtual pin/pins to get actual data.
         @param v_pin: single pin or multiple pins number
         @return: Returns the number of bytes sent
         """
         return self.send(self.virtual_sync_msg(*v_pin))
+
+    def email(self, to, subject, body):
+        """
+        Send email from your hardware to any address.
+        @param to: destination email address
+        @param subject: email subject
+        @param body: email body
+        @return: Returns the number of bytes sent
+        """
+        return self.send(self.email_msg(to, subject, body))
 
     def handle_event(blynk, event_name):
         class Decorator(object):

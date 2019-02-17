@@ -56,11 +56,10 @@ import time
 
 BLYNK_AUTH = 'YourAuthToken'
 
-# initialize blynk
 blynk = blynklib.Blynk(BLYNK_AUTH)
 
-CONNECT_PRINT_MSG = """[CONNECT_EVENT]"""
-DISCONNECT_PRINT_MSG = """[DISCONNECT_EVENT]"""
+CONNECT_PRINT_MSG = '[CONNECT_EVENT]'
+DISCONNECT_PRINT_MSG = '[DISCONNECT_EVENT]'
 
 
 @blynk.handle_event("connect")
@@ -78,6 +77,8 @@ def connect_handler():
     time.sleep(4)
 
 
+###########################################################
 # infinite loop that waits for event
+###########################################################
 while True:
     blynk.run()
