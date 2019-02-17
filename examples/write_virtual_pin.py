@@ -52,12 +52,12 @@ Additional blynk info you can find by examining such resources:
 ====================================================================================================
 """
 
-import BlynkLib
+import blynklib
 
 BLYNK_AUTH = 'YourAuthToken'
 
 # initialize Blynk
-blynk = BlynkLib.Blynk(BLYNK_AUTH)
+blynk = blynklib.Blynk(BLYNK_AUTH)
 
 WRITE_EVENT_PRINT_MSG = """[WRITE_VIRTUAL_PIN_EVENT] Pin: V{} Value: '{}'"""
 

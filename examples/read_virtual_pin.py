@@ -55,13 +55,13 @@ Additional info about blynk you can find by examining such resources:
 =====================================================================================================
 """
 
-import BlynkLib
+import blynklib
 import random
 
 BLYNK_AUTH = 'YourAuthToken'
 
 # initialize blynk
-blynk = BlynkLib.Blynk(BLYNK_AUTH)
+blynk = blynklib.Blynk(BLYNK_AUTH)
 
 READ_PRINT_MSG = """[READ_VIRTUAL_PIN_EVENT] Pin: V{}"""
 

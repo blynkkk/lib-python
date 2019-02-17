@@ -5,10 +5,19 @@ import struct
 import time
 import sys
 
-VERSION = '0.2.1'
+VERSION = '0.2.2'
 
 
 # todo change globally logging
+# todo separate in log re-connect
+# todo print list of registered events
+# todo add to examples config call with logger
+# todo notification event
+# todo  on connect event
+# todo on disconnect event
+# todo MSG_REDIRECT = 41 ??
+# todo MSG_DBG_PRINT = 55 ??
+# todo add debug response statuses parse operation
 
 # todo think about why this is needed
 # MPY_SUPPORT_INSTRUCTION_1 = 'import machine'
@@ -54,12 +63,12 @@ class Protocol(object):
     MSG_PROPERTY = 19
     MSG_HW = 20
     MSG_EVENT_LOG = 64
-    # MSG_REDIRECT = 41  # TODO: not implemented
-    # MSG_DBG_PRINT = 55  # TODO: not implemented
+
     MSG_HEAD_LEN = 5
     STATUS_SUCCESS = 200
     HEARTBEAT_PERIOD = 10
     MAX_CMD_BUFFER = 1024
+    VIRTUAL_PIN_MAX_NUM = 32
 
     _vr_pins = {}
     _msg_id = 1
@@ -124,7 +133,6 @@ class Connection(Protocol):
     RETRIES_TX_DELAY = 2
     RETRIES_TX_MAX_NUM = 3
     TASK_PERIOD_RES = 50  # 50ms
-    CONNECT_CALL_TIMEOUT = 30  # 30sec
 
     token = None
     server = None
@@ -136,7 +144,6 @@ class Connection(Protocol):
     _last_ping_time = 0
     _last_send_time = 0
 
-    # todo maybe add Blynk Error or some other return 0?
     def send(self, data):
         curr_retry_num = 0
         while curr_retry_num <= self.RETRIES_TX_MAX_NUM:
@@ -215,40 +222,6 @@ class Connection(Protocol):
             raise BlynkException('Heartbeat operation status= {}'.format(status))
         print("Heartbeat period = {} seconds. Happy Blynking!\n".format(self.HEARTBEAT_PERIOD))
 
-    def connect(self, timeout=CONNECT_CALL_TIMEOUT):
-        """
-        Function will continue trying to connect to Blynk server.
-        @param timeout: global function retry timeout. Default value = 30 seconds
-        @return: connection status
-        """
-        end_time = time.time() + timeout
-        while not self.connected():
-            try:
-                if self.state == self.STATE_DISCONNECTED:
-                    self._get_socket(self.ssl_flag)
-                    self._authenticate()
-                    self._set_heartbeat()
-                    return True
-            except BlynkException as b_exc:
-                self.disconnect(b_exc)
-                sleep_ms(self.TASK_PERIOD_RES)
-            finally:
-                if time.time() >= end_time:
-                    return False
-
-    def disconnect(self, err_msg=None):
-        """
-        Disconnects hardware from Blynk server
-        @param err_msg: error message to print. Optional parameter
-        @return: None
-        """
-        if isinstance(self.socket, socket.socket):
-            self.socket.close()
-        self.state = self.STATE_DISCONNECTED
-        if err_msg:
-            print('Error: {}. Connection closed'.format(err_msg))
-        time.sleep(self.SOCK_RECONNECT_DELAY)
-
     def connected(self):
         """
         Returns true when hardware is connected to Blynk Server, false if there is no active connection to Blynk server.
@@ -260,6 +233,16 @@ class Connection(Protocol):
 class Blynk(Connection):
     BLYNK_SERVER = "blynk-cloud.com"
     BLYNK_HTTP_PORT = 80
+    CONNECT_CALL_TIMEOUT = 30  # 30sec
+
+    VPIN_WILDCARD = '*'
+    READ_VPIN_EVENT_BASENAME = 'read V'
+    WRITE_VPIN_EVENT_BASENAME = 'write V'
+    INTERNAL_EVENT_BASENAME = 'internal_'
+    CONNECT_EVENT = 'connect'
+    DISCONNECT_EVENT = 'disconnect'
+    READ_ALL_VPIN_EVENT = READ_VPIN_EVENT_BASENAME + VPIN_WILDCARD
+    WRITE_ALL_VPIN_EVENT = WRITE_VPIN_EVENT_BASENAME + VPIN_WILDCARD
 
     def __init__(self, token, server=BLYNK_SERVER, port=BLYNK_HTTP_PORT, ssl=True):
         self.token = token
@@ -288,6 +271,42 @@ class Blynk(Connection):
         self.port = port
         self.ssl = ssl
 
+    def connect(self, timeout=CONNECT_CALL_TIMEOUT):
+        """
+        Function will continue trying to connect to Blynk server.
+        @param timeout: global function retry timeout. Default value = 30 seconds
+        @return: connection status
+        """
+        end_time = time.time() + timeout
+        while not self.connected():
+            try:
+                if self.state == self.STATE_DISCONNECTED:
+                    self._get_socket(self.ssl_flag)
+                    self._authenticate()
+                    self._set_heartbeat()
+                    self.call_handler(self.CONNECT_EVENT)
+                    return True
+            except BlynkException as b_exc:
+                self.disconnect(b_exc)
+                sleep_ms(self.TASK_PERIOD_RES)
+            finally:
+                if time.time() >= end_time:
+                    return False
+
+    def disconnect(self, err_msg=None):
+        """
+        Disconnects hardware from Blynk server
+        @param err_msg: error message to print. Optional parameter
+        @return: None
+        """
+        if isinstance(self.socket, socket.socket):
+            self.socket.close()
+        self.state = self.STATE_DISCONNECTED
+        if err_msg:
+            print('Error: {}. Connection closed'.format(err_msg))
+        time.sleep(self.SOCK_RECONNECT_DELAY)
+        self.call_handler(self.DISCONNECT_EVENT)
+
     def virtual_write(self, v_pin, *val):
         """
         Write data to virtual pin
@@ -300,7 +319,7 @@ class Blynk(Connection):
     def virtual_sync(self, *v_pin):
         # todo change description
         """
-        Sync virtual pin/pins to get actual data. For HW this is equal to read data from virtual pin/pins operation
+        Sync virtual pin/pins to get actual data.
         @param v_pin: single pin or multiple pins number
         @return: Returns the number of bytes sent
         """
@@ -310,7 +329,14 @@ class Blynk(Connection):
         class Decorator(object):
             def __init__(self, func):
                 self.func = func
-                blynk.events[event_name] = func
+                # wildcard 'read V*' and 'write V*' events handling
+                if str(event_name) in (blynk.READ_ALL_VPIN_EVENT, blynk.WRITE_ALL_VPIN_EVENT):
+                    event_base_name = str(event_name).split(blynk.VPIN_WILDCARD)[0]
+                    for i in range(1, blynk.VIRTUAL_PIN_MAX_NUM + 1):
+                        blynk.events['{}{}'.format(event_base_name, i)] = func
+                        print('Registered {}{}'.format(event_base_name, i))
+                else:
+                    blynk.events[str(event_name)] = func
 
             def __call__(self):
                 return self.func()
@@ -331,19 +357,19 @@ class Blynk(Connection):
         elif msg_type in (self.MSG_HW, self.MSG_BRIDGE):
             if len(msg_args) >= 2:
                 if msg_args[0] == 'vw':
-                    # todo think about V* values
-                    self.call_handler("write V{}".format(msg_args[1]), msg_args[1], msg_args[2:])
+                    self.call_handler("{}{}".format(self.WRITE_VPIN_EVENT_BASENAME, msg_args[1]), msg_args[1],
+                                      msg_args[2:])
                 elif msg_args[0] == 'vr':
-                    self.call_handler("read V{}".format(msg_args[1]), msg_args[1])
+                    self.call_handler("{}{}".format(self.READ_VPIN_EVENT_BASENAME, msg_args[1]), msg_args[1])
         elif msg_type == self.MSG_INTERNAL:
             if len(msg_args) >= 2:
-                self.call_handler("internal_{}".format(msg_args[1]), msg_args[2:])
+                self.call_handler("{}{}".format(self.INTERNAL_EVENT_BASENAME, msg_args[1]), msg_args[2:])
 
     def run(self):
         """
         This function should be called frequently to process incoming commands
         and perform housekeeping of Blynk connection.
-        @return:
+        @return: None
         """
         if not self.connected():
             self.connect()
