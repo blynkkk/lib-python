@@ -56,7 +56,12 @@ Additional info about blynk you can find by examining such resources:
 """
 
 import blynklib
-import random
+
+try:
+    import time
+except ImportError:
+    # micropython support
+    import utime as time
 
 BLYNK_AUTH = 'YourAuthToken'
 
@@ -70,7 +75,8 @@ READ_PRINT_MSG = "[READ_VIRTUAL_PIN_EVENT] Pin: V{}"
 @blynk.handle_event('read V11')
 def read_virtual_pin_handler(pin):
     print(READ_PRINT_MSG.format(pin))
-    blynk.virtual_write(pin, random.randint(0, 255))
+    random_value = int(time.time()) % 256  # 0-255
+    blynk.virtual_write(pin, random_value)
 
 
 ###########################################################

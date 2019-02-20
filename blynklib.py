@@ -59,6 +59,8 @@ class BlynkException(Exception):
 
 
 class Protocol(object):
+    # todo const should be added according
+    # https: // docs.micropython.org / en / latest / reference / constrained.html  # execution-phase
     MSG_RSP = 0
     MSG_LOGIN = 2
     MSG_PING = 6
@@ -78,8 +80,11 @@ class Protocol(object):
     MAX_CMD_BUFFER = 1024
     VIRTUAL_PIN_MAX_NUM = 32
 
-    _vr_pins = {}
     _msg_id = 1
+
+    @staticmethod
+    def _parse_msg_body(msg_body):
+        return [itm.decode('ascii') for itm in msg_body.split(b'\0')]
 
     def _get_msg_id(self):
         self._msg_id += 1
@@ -88,10 +93,6 @@ class Protocol(object):
     def _pack_msg(self, msg_type, *args):
         data = ('\0'.join([str(curr_arg) for curr_arg in args])).encode('ascii')
         return struct.pack('!BHH', msg_type, self._get_msg_id(), len(data)) + data
-
-    @staticmethod
-    def _parse_msg_body(msg_body):
-        return [itm.decode('ascii') for itm in msg_body.split(b'\0')]
 
     def parse_response(self, rsp_data, expected_msg_type=None):
         msg_args = []
@@ -135,7 +136,6 @@ class Protocol(object):
 
 
 class Connection(Protocol):
-    SOCK_MIN_TIMEOUT = 1  # 1 second
     SOCK_MAX_TIMEOUT = 5  # 5 seconds, must be < self.HEARTBEAT_PERIOD
     SOCK_CONNECTION_TIMEOUT = 0.05
     SOCK_RECONNECT_DELAY = 1  # 1 second
@@ -172,43 +172,33 @@ class Connection(Protocol):
         curr_retry_num = 0
         while curr_retry_num <= self.RETRIES_TX_MAX_NUM:
             try:
+                curr_retry_num += 1
                 self._last_send_time = ticks_ms()
                 return self.socket.send(data)
-            # except (socket.error, socket.timeout):
-            except OSError as sock_err:
-                # todo remove
-                print(sock_err)
-                import os
-                print(os.strerror(sock_err))
+            except OSError as os_err:
+                # todo add other errors handling aka subclass of socket err
                 sleep_ms(self.RETRIES_TX_DELAY)
-                curr_retry_num += 1
 
     # todo think about error handling
     def receive(self, length, timeout=0.0):
         try:
             rcv_buffer = b''
-            # self.socket.settimeout(timeout)
             self._set_socket_timeout(timeout)
             rcv_buffer += self.socket.recv(length)
             if len(rcv_buffer) >= length:
                 rcv_buffer = rcv_buffer[:length]
             return rcv_buffer
-        # except socket.timeout:
         except OSError as os_err:
-            print(os_err)
-            import os
-            print(os.strerror(os_err))
-            # todo we need prove this socket_timeout value form poller?
-            if int(os_err) in (self.ERR_EAGAIN, self.ERR_ETIMEDOUT):
+            # todo add as constant
+            if str(os_err) == 'timed out':
                 return b''
+            if isinstance(os_err, int):
+                # todo we need prove this socket_timeout value from poller?
+                # todo remove
+                print("OSError value = {}".format(int(os_err)))
+                if int(os_err) in (self.ERR_EAGAIN, self.ERR_ETIMEDOUT):
+                    return b''
             raise
-            # if s_err.args[0] == self.SOCK_EAGAIN:
-            #    return b''
-            # return b''
-        # except socket.error as s_err:
-        #     if s_err.args[0] == self.SOCK_EAGAIN:
-        #         return b''
-        #     raise
 
     def is_server_alive(self):
         now = ticks_ms()
@@ -233,8 +223,6 @@ class Connection(Protocol):
                 # todo add ssl support
                 raise NotImplementedError
             self.socket.connect(socket.getaddrinfo(self.server, self.port)[0][4])
-            # todo add micropython support
-            # self.socket.settimeout(self.SOCK_CONNECTION_TIMEOUT)
             self._set_socket_timeout(self.SOCK_CONNECTION_TIMEOUT)
             print('Blynk connection socket created')
         except Exception as g_exc:
@@ -341,7 +329,7 @@ class Blynk(Connection):
         @param err_msg: error message to print. Optional parameter
         @return: None
         """
-        if isinstance(self.socket, socket.socket):
+        if self.socket is not None:
             self.socket.close()
         self.state = self.STATE_DISCONNECTED
         if err_msg:
