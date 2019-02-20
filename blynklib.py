@@ -1,12 +1,8 @@
 # Copyright (c) 2015-2019 Volodymyr Shymanskyy. See the file LICENSE for copying permission.
 # Copyright (c) 2019 Anton Morozenko
-import socket
-import struct
-import time
 import sys
 
 VERSION = '0.2.2'
-
 
 # todo change globally logging
 # todo separate in log re-connect
@@ -28,6 +24,18 @@ VERSION = '0.2.2'
 #         continue
 #     except AttributeError:
 #         pass
+
+# micropython compatibility
+try:
+    import socket
+    import time
+    import struct
+    import select
+except ImportError:
+    import usocket as socket
+    import utime as time
+    import ustruct as struct
+    import uselect as select
 
 
 def ticks_ms():
@@ -131,7 +139,8 @@ class Connection(Protocol):
     SOCK_MAX_TIMEOUT = 5  # 5 seconds, must be < self.HEARTBEAT_PERIOD
     SOCK_CONNECTION_TIMEOUT = 0.05
     SOCK_RECONNECT_DELAY = 1  # 1 second
-    SOCK_EAGAIN = 11
+    ERR_EAGAIN = 11
+    ERR_ETIMEDOUT = 60
     STATE_DISCONNECTED = 0
     STATE_CONNECTING = 1
     STATE_AUTHENTICATING = 2
@@ -151,13 +160,26 @@ class Connection(Protocol):
     _last_ping_time = 0
     _last_send_time = 0
 
+    def _set_socket_timeout(self, timeout):
+        if getattr(self.socket, 'settimeout', None) is not None:
+            self.socket.settimeout(timeout)
+        else:
+            poller = select.poll()
+            poller.register(self.socket)
+            poller.poll(int(timeout * 1000))  # time in milliseconds
+
     def send(self, data):
         curr_retry_num = 0
         while curr_retry_num <= self.RETRIES_TX_MAX_NUM:
             try:
                 self._last_send_time = ticks_ms()
                 return self.socket.send(data)
-            except (socket.error, socket.timeout):
+            # except (socket.error, socket.timeout):
+            except OSError as sock_err:
+                # todo remove
+                print(sock_err)
+                import os
+                print(os.strerror(sock_err))
                 sleep_ms(self.RETRIES_TX_DELAY)
                 curr_retry_num += 1
 
@@ -165,17 +187,28 @@ class Connection(Protocol):
     def receive(self, length, timeout=0.0):
         try:
             rcv_buffer = b''
-            self.socket.settimeout(timeout)
+            # self.socket.settimeout(timeout)
+            self._set_socket_timeout(timeout)
             rcv_buffer += self.socket.recv(length)
             if len(rcv_buffer) >= length:
                 rcv_buffer = rcv_buffer[:length]
             return rcv_buffer
-        except socket.timeout:
-            return b''
-        except socket.error as s_err:
-            if s_err.args[0] == self.SOCK_EAGAIN:
+        # except socket.timeout:
+        except OSError as os_err:
+            print(os_err)
+            import os
+            print(os.strerror(os_err))
+            # todo we need prove this socket_timeout value form poller?
+            if int(os_err) in (self.ERR_EAGAIN, self.ERR_ETIMEDOUT):
                 return b''
             raise
+            # if s_err.args[0] == self.SOCK_EAGAIN:
+            #    return b''
+            # return b''
+        # except socket.error as s_err:
+        #     if s_err.args[0] == self.SOCK_EAGAIN:
+        #         return b''
+        #     raise
 
     def is_server_alive(self):
         now = ticks_ms()
@@ -200,7 +233,9 @@ class Connection(Protocol):
                 # todo add ssl support
                 raise NotImplementedError
             self.socket.connect(socket.getaddrinfo(self.server, self.port)[0][4])
-            self.socket.settimeout(self.SOCK_CONNECTION_TIMEOUT)
+            # todo add micropython support
+            # self.socket.settimeout(self.SOCK_CONNECTION_TIMEOUT)
+            self._set_socket_timeout(self.SOCK_CONNECTION_TIMEOUT)
             print('Blynk connection socket created')
         except Exception as g_exc:
             raise BlynkException('Connection with the Blynk servers failed: {}'.format(g_exc))
@@ -381,6 +416,7 @@ class Blynk(Connection):
             if len(msg_args) >= 2:
                 self.call_handler("{}{}".format(self.INTERNAL_EVENT_BASENAME, msg_args[1]), msg_args[2:])
 
+    # todo KeyboardInterrupt handle on all layers?
     def run(self):
         """
         This function should be called frequently to process incoming commands
