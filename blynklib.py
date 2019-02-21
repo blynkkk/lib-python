@@ -4,26 +4,13 @@ import sys
 
 VERSION = '0.2.2'
 
-# todo change globally logging
-# todo separate in log re-connect
+# todo to think about logging globally
+# todo separate in log re-connect events
 # todo print list of registered events
-# todo add to examples config call with logger
-# todo notification event
 # todo tweet call
-# todo notify call
 # todo MSG_REDIRECT = 41 ??
 # todo MSG_DBG_PRINT = 55 ??
 # todo add debug response statuses parse operation
-
-# todo think about why this is needed
-# MPY_SUPPORT_INSTRUCTION_1 = 'import machine'
-# for itm in [MPY_SUPPORT_INSTRUCTION_1]:
-#     try:
-#         exec itm
-#     except ImportError:
-#         continue
-#     except AttributeError:
-#         pass
 
 # micropython compatibility
 try:
@@ -60,7 +47,7 @@ class BlynkException(Exception):
 
 class Protocol(object):
     # todo const should be added according
-    # https: // docs.micropython.org / en / latest / reference / constrained.html  # execution-phase
+    # https://docs.micropython.org/en/latest/reference/constrained.html#execution-phase
     MSG_RSP = 0
     MSG_LOGIN = 2
     MSG_PING = 6
@@ -124,7 +111,6 @@ class Protocol(object):
     def virtual_write_msg(self, v_pin, *val):
         return self._pack_msg(self.MSG_HW, 'vw', v_pin, *val)
 
-    # todo check multiple values support
     def virtual_sync_msg(self, *pins):
         return self._pack_msg(self.MSG_HW_SYNC, 'vr', *pins)
 
@@ -133,6 +119,9 @@ class Protocol(object):
 
     def notify_msg(self, msg):
         return self._pack_msg(self.MSG_NOTIFY, msg)
+
+    def set_property_msg(self, pin, prop, *val):
+        return self._pack_msg(self.MSG_PROPERTY, pin, prop, *val)
 
 
 class Connection(Protocol):
@@ -149,6 +138,7 @@ class Connection(Protocol):
     RETRIES_TX_DELAY = 2
     RETRIES_TX_MAX_NUM = 3
     TASK_PERIOD_RES = 50  # 50ms
+    SOCK_TIMEOUT_MSG = 'timed out'
 
     token = None
     server = None
@@ -175,11 +165,9 @@ class Connection(Protocol):
                 curr_retry_num += 1
                 self._last_send_time = ticks_ms()
                 return self.socket.send(data)
-            except OSError as os_err:
-                # todo add other errors handling aka subclass of socket err
+            except (IOError, OSError):
                 sleep_ms(self.RETRIES_TX_DELAY)
 
-    # todo think about error handling
     def receive(self, length, timeout=0.0):
         try:
             rcv_buffer = b''
@@ -188,15 +176,11 @@ class Connection(Protocol):
             if len(rcv_buffer) >= length:
                 rcv_buffer = rcv_buffer[:length]
             return rcv_buffer
-        except OSError as os_err:
-            # todo add as constant
-            if str(os_err) == 'timed out':
+        except (IOError, OSError) as err:
+            if str(err) == self.SOCK_TIMEOUT_MSG:
                 return b''
-            if isinstance(os_err, int):
-                # todo we need prove this socket_timeout value from poller?
-                # todo remove
-                print("OSError value = {}".format(int(os_err)))
-                if int(os_err) in (self.ERR_EAGAIN, self.ERR_ETIMEDOUT):
+            if isinstance(err, int):
+                if int(err) in (self.ERR_EAGAIN, self.ERR_ETIMEDOUT):
                     return b''
             raise
 
@@ -356,13 +340,31 @@ class Blynk(Connection):
 
     def email(self, to, subject, body):
         """
-        Send email from your hardware to any address.
+        Send email from hardware to any address.
         @param to: destination email address
         @param subject: email subject
         @param body: email body
         @return: Returns the number of bytes sent
         """
         return self.send(self.email_msg(to, subject, body))
+
+    def notify(self, msg):
+        """
+        Send notification from hardware to App
+        @param msg: notification message
+        @return: Returns the number of bytes sent
+        """
+        return self.send(self.notify_msg(msg))
+
+    def set_property(self, v_pin, property_name, *val):
+        """
+        Set virtual pin property eg. "color", "label" etc
+        @param v_pin: pin number
+        @param property_name: name of target property
+        @param val: values that should be assigned for target property
+        @return: Returns the number of bytes sent
+        """
+        return self.send(self.set_property_msg(v_pin, property_name, *val))
 
     def handle_event(blynk, event_name):
         class Decorator(object):
@@ -404,7 +406,6 @@ class Blynk(Connection):
             if len(msg_args) >= 2:
                 self.call_handler("{}{}".format(self.INTERNAL_EVENT_BASENAME, msg_args[1]), msg_args[2:])
 
-    # todo KeyboardInterrupt handle on all layers?
     def run(self):
         """
         This function should be called frequently to process incoming commands

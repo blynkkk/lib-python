@@ -53,12 +53,7 @@ Additional info about blynk you can find by examining such resources:
 """
 
 import blynklib
-
-try:
-    import time
-except ImportError:
-    # micropython support
-    import utime as time
+import time
 
 BLYNK_AUTH = 'YourAuthToken'
 TARGET_EMAIL = 'YourTargetEmail'
