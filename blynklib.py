@@ -11,6 +11,7 @@ VERSION = '0.2.2'
 # todo MSG_REDIRECT = 41 ??
 # todo MSG_DBG_PRINT = 55 ??
 # todo add debug response statuses parse operation
+# todo lowercase for event names
 
 # micropython compatibility
 try:
@@ -23,6 +24,11 @@ except ImportError:
     import utime as time
     import ustruct as struct
     import uselect as select
+
+try:
+    type(IOError)
+except NameError:
+    IOError = OSError
 
 
 def ticks_ms():

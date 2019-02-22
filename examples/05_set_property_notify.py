@@ -16,6 +16,7 @@ This started program will periodically call and execute event handler "write_vir
 In app you can move slider that will cause LED brightness change and will send virtual write event
 to current running example. Handler will set random color for virtual pin and will send notification
 event to App. Virtual pin property 'color' change will cause color changes for "Slider" and "LED" widgets
+In App user will get notifications about color change event.
 
 Schema:
 =====================================================================================================================
