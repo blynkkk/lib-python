@@ -1,31 +1,97 @@
-# todo add caption and finish
+"""
+[TERMINAL WIDGET EXAMPLE] ==========================================================================================
 
-import time
+Environment prepare:
+In your Blynk App project:
+  - add "Terminal" widget,
+  - bind it to Virtual Pin V6,
+  - add input line option in widget settings
+  - Run the App (green triangle in the upper right corner).
+  - define your auth token for current example
+  - optionally you can define your own "ALLOWED_COMMANDS_LIST"
+  - run current example
+
+
+This started program will periodically call and execute event handler "write_virtual_pin_handler".
+In App Terminal widget you can type commands. If command present in allowed list, script will try
+to execute it in current running environment and will send back to terminal execution results.
+Additionally can be used 'help' command to get in terminal list of available commands.
+
+Schema:
+=====================================================================================================================
++-----+             +-----------+                        +--------------+                    +--------------+
+|     |             |           |                        |              |                    |              |
+| env |             | blynk lib |                        | blynk server |                    |  blynk app   |
+|     |             |           |                        |  virtual pin |                    |              |
+|     |             |           |                        |              |                    |              |
++--+--+             +-----+-----+                        +------+-------+                    +-------+------+
+   |                      |                                     |                                    |
+   |                      |                                     | write command from terminal widget |
+   |                      |                                     |                                    |
+   |                      |                                     +<-----------------------------------+
+   |       event handler  |   write event to hw from server     |                                    |
+   |      (user function) |                                     |                                    |
+   |  exec     +-----------<------------------------------------+                                    |
+   +<----------+          |                                     |                                    |
+   |           |          |      write cmd out back to pin      |                                    |
+   +---------->+--------->------------------------------------->+                                    |
+   |                      |                                     |           was pin updated?         |
+   |                      |                                     +<-----------------------------------+
+   |                      |                                     |                                    |
+   |                      |                                     |                                    |
+   |                      |                                     |  take vpin data to widget output   |
+   |                      |                                     |                                    |
+   |                      |                                     +----------------------------------->+
+   |                      |                                     |                                    |
+   +                      +                                     +                                    +
+
+=====================================================================================================================
+Additional info about blynk you can find by examining such resources:
+
+    Downloads, docs, tutorials:     http://www.blynk.cc
+    Sketch generator:               http://examples.blynk.cc
+    Blynk community:                http://community.blynk.cc
+    Social networks:                http://www.fb.com/blynkapp
+                                    http://twitter.com/blynk_app
+=====================================================================================================================
+"""
+
 import blynklib
 import subprocess
 
 BLYNK_AUTH = 'YourAuthToken'
-USB_DEV_PATTERN = 'Linux'
+
+# last command in example - just to show error handling
+ALLOWED_COMMANDS_LIST = ['ls', 'lsusb', 'ip a', 'ip abc']
 
 blynk = blynklib.Blynk(BLYNK_AUTH)
 
 
-@blynk.handle_event("connect")
-def connect_handler():
-    print('smth')
-    blynk.virtual_write(22, 'Command22:')
-
-
-@blynk.handle_event('write V22')
+@blynk.handle_event('write V6')
 def write_handler(pin, values):
-    if values and values[0] == u'lsusb':
-        found_usb_dev = subprocess.check_output("lsusb")
-        dev_list = found_usb_dev.split('\n')
-        target_dev_list = [dev_rec for dev_rec in dev_list if USB_DEV_PATTERN in dev_rec]
-        print('{}'.format(target_dev_list))
-        print('=' * 20)
-        # todo understand why this is not working always
-        blynk.virtual_write(22, 'USB: 123\n')
+    header = ''
+    result = ''
+    delimiter = '{}\n'.format('=' * 30)
+    if values and values[0] in ALLOWED_COMMANDS_LIST:
+        cmd_params = values[0].split(' ')
+        try:
+            result = subprocess.check_output(cmd_params).decode('utf-8')
+            header = '[output]\n'
+        except subprocess.CalledProcessError as exe_err:
+            header = '[error]\n'
+            result = 'Return Code: {}\n'.format(exe_err.returncode)
+        except Exception as g_err:
+            print("Command caused '{}'".format(g_err))
+    elif values and values[0] == 'help':
+        header = '[help -> allowed commands]\n'
+        result = '{}\n'.format('\n'.join(ALLOWED_COMMANDS_LIST))
+
+    # communicate with terminal if help or some allowed command
+    if result:
+        output = '{}{}{}{}'.format(header, delimiter, result, delimiter)
+        print(output)
+        blynk.virtual_write(pin, output)
+        blynk.virtual_write(pin, '\n')
 
 
 ###########################################################

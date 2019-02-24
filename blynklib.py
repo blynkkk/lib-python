@@ -72,9 +72,10 @@ class Protocol(object):
         self._msg_id += 1
         return self._msg_id if self._msg_id <= 0xFFFF else 1
 
-    def _pack_msg(self, msg_type, *args):
-        data = ('\0'.join([str(curr_arg) for curr_arg in args])).encode('ascii')
-        return struct.pack('!BHH', msg_type, self._get_msg_id(), len(data)) + data
+    def _pack_msg(self, msg_type, *args, **kwargs):
+        msg_id = kwargs['msg_id'] if 'msg_id' in kwargs else self._get_msg_id()
+        data = ('\0'.join([str(curr_arg) for curr_arg in args])).encode('utf8')
+        return struct.pack('!BHH', msg_type, msg_id, len(data)) + data
 
     def parse_response(self, rsp_data, expected_msg_type=None):
         msg_args = []
@@ -100,8 +101,11 @@ class Protocol(object):
     def login_msg(self, token):
         return self._pack_msg(self._MSG_LOGIN, token)
 
-    def ping_reply_msg(self, msg_id, status):
-        return self._pack_msg(self._MSG_RSP, msg_id, status)
+    def ping_msg(self):
+        return self._pack_msg(self._MSG_PING)
+
+    def response_msg(self, *args, **kwargs):
+        return self._pack_msg(self._MSG_RSP, *args, **kwargs)
 
     def virtual_write_msg(self, v_pin, *val):
         return self._pack_msg(self._MSG_HW, 'vw', v_pin, *val)
@@ -185,10 +189,10 @@ class Connection(Protocol):
         receive_delta = now - self._last_receive_time
         ping_delta = now - self._last_ping_time
         send_delta = now - self._last_send_time
-        if receive_delta > heartbeat_ms * 1.5:
+        if receive_delta > heartbeat_ms + (heartbeat_ms // 2):
             return False
-        if (ping_delta > heartbeat_ms / 10) and (send_delta > heartbeat_ms or receive_delta > heartbeat_ms):
-            self.send(self.ping_reply_msg(self._get_msg_id(), 0))
+        if (ping_delta > heartbeat_ms // 10) and (send_delta > heartbeat_ms or receive_delta > heartbeat_ms):
+            self.send(self.ping_msg())
             print('Heartbeat time: {}'.format(now))
             self._last_ping_time = now
         return True
@@ -315,7 +319,6 @@ class Blynk(Connection):
                     event_base_name = str(event_name).split(blynk.VPIN_WILDCARD)[0]
                     for i in range(1, blynk._VIRTUAL_PIN_MAX_NUM + 1):
                         blynk.events['{}{}'.format(event_base_name, i)] = func
-                        print('Registered {}{}'.format(event_base_name, i))
                 else:
                     blynk.events[str(event_name)] = func
 
@@ -333,7 +336,7 @@ class Blynk(Connection):
         if msg_type == self._MSG_RSP:
             print(msg_len)
         elif msg_type == self._MSG_PING:
-            self.send(self.ping_reply_msg(msg_id, self._STATUS_SUCCESS))
+            self.send(self.response_msg(self._STATUS_SUCCESS, msg_id=msg_id))
         elif msg_type in (self._MSG_HW, self._MSG_BRIDGE):
             if len(msg_args) >= 2:
                 if msg_args[0] == 'vw':
