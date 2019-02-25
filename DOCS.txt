@@ -1,3 +1,4 @@
+
 # todo to think about logging globally
 # todo separate in log re-connect events
 # todo print list of registered events
@@ -6,21 +7,43 @@
 # todo MSG_DBG_PRINT = 55 ??
 # todo add debug response statuses parse operation
 # todo lowercase for event names
-# todo add status handling maybe for process RSp message
+# todo add status handling maybe for process RSP message
 # todo add ssl support
 # todo remove heartbeat printing and event printing
 
-# todo const should be added according
-# https://docs.micropython.org/en/latest/reference/constrained.html#execution-phase
 
 # todo add invalid auth token STA_INVALID_TOKEN =(9)
 # def _authenticate(self):
 # todo eval certain repetitive expressions
 # review constants
-
+# todo review error handling in user callbacks
 
 
 # todo MSG_EVENT_LOG = 64
+######################################################################################################
+# https://docs.micropython.org/en/latest/reference/constrained.html#execution-phase
+
+gpio readall
+http://wiringpi.com/download-and-install/
+
+https://github.com/adafruit/Adafruit_Python_DHT/blob/master/examples/simpletest.py
+
+git clone https://github.com/micropython/micropython.git
+cd micropython/
+make
+./mpy-cross --help
+./mpy-cross <input_py_file>
+*.mpy file will be created that can be imported in the same way as common py libs
+
+to use heapsize
+import gc
+gc.collect()
+gc.mem_free()
+
+10843
+6338
+
+
 #=============================================================================
 # def connected(self):
 """
