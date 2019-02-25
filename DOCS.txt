@@ -11,6 +11,8 @@
 # todo add ssl support
 # todo remove heartbeat printing and event printing
 
+# todo virtual_write/read pin should be int
+
 
 # todo add invalid auth token STA_INVALID_TOKEN =(9)
 # def _authenticate(self):
