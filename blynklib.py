@@ -3,31 +3,22 @@
 VERSION = '0.2.2'
 
 try:
-    from micropython import const
     import usocket as socket
     import utime as time
     import ustruct as struct
     import uselect as select
+    from micropython import const
+
+    IOError = OSError
 except ImportError:
-    const = lambda x: x
     import socket
     import time
     import struct
     import select
 
-try:
-    type(IOError)
-except NameError:
-    IOError = OSError
-
-
-def ticks_ms():
-    return getattr(time, 'ticks_ms', lambda: int(time.time() * 1000))()
-
-
-def sleep_ms(m_sec):
-    return getattr(time, 'sleep_ms', lambda x: time.sleep(x // 1000))(m_sec)
-
+    const = lambda x: x
+    ticks_ms = lambda: int(time.time() * 1000)
+    sleep_ms = lambda m_sec: time.sleep(m_sec // 1000)
 
 LOGO = """
         ___  __          __
@@ -57,15 +48,13 @@ class Protocol(object):
     _MSG_HEAD_LEN = const(5)
     _STATUS_INVALID_TOKEN = const(9)
     _STATUS_SUCCESS = const(200)
-    _HEARTBEAT_PERIOD = const(10)
-    _MAX_CMD_BUFFER = const(1024)
     _VIRTUAL_PIN_MAX_NUM = const(32)
 
     _msg_id = 1
 
     @staticmethod
     def _parse_msg_body(msg_body):
-        return [itm.decode('ascii') for itm in msg_body.split(b'\0')]
+        return [itm.decode('utf-8') for itm in msg_body.split(b'\0')]
 
     def _get_msg_id(self):
         self._msg_id += 1
@@ -76,12 +65,12 @@ class Protocol(object):
         data = ('\0'.join([str(curr_arg) for curr_arg in args])).encode('utf8')
         return struct.pack('!BHH', msg_type, msg_id, len(data)) + data
 
-    def parse_response(self, rsp_data):
+    def parse_response(self, rsp_data, max_msg_buffer):
         msg_args = []
         msg_type, msg_id, h_data = struct.unpack('!BHH', rsp_data[:self._MSG_HEAD_LEN])
         if msg_id == 0:
             raise BlynkException('invalid msg_id == 0')
-        elif h_data >= self._MAX_CMD_BUFFER:
+        elif h_data >= max_msg_buffer:
             raise BlynkException('Command too long. Length = {}'.format(h_data))
         elif msg_type in (self._MSG_RSP, self._MSG_PING, self._MSG_INTERNAL):
             pass
@@ -91,9 +80,9 @@ class Protocol(object):
             raise BlynkException("Unknown message type: '{}'".format(msg_type))
         return msg_type, msg_id, h_data, msg_args
 
-    def heartbeat_msg(self):
-        return self._pack_msg(self._MSG_INTERNAL, 'ver', VERSION, 'buff-in', self._MAX_CMD_BUFFER, 'h-beat',
-                              self._HEARTBEAT_PERIOD, 'dev', 'python')
+    def heartbeat_msg(self, heartbeat, max_msg_buffer):
+        return self._pack_msg(self._MSG_INTERNAL, 'ver', VERSION, 'buff-in', max_msg_buffer, 'h-beat', heartbeat,
+                              'dev', 'python')
 
     def login_msg(self, token):
         return self._pack_msg(self._MSG_LOGIN, token)
@@ -180,9 +169,9 @@ class Connection(Protocol):
                     return b''
             raise
 
-    def is_server_alive(self):
+    def is_server_alive(self, heartbeat):
         now = ticks_ms()
-        heartbeat_ms = self._HEARTBEAT_PERIOD * 1000
+        heartbeat_ms = heartbeat * 1000
         receive_delta = now - self._last_receive_time
         ping_delta = now - self._last_ping_time
         send_delta = now - self._last_send_time
@@ -204,16 +193,16 @@ class Connection(Protocol):
             self._set_socket_timeout(self._SOCK_CONNECTION_TIMEOUT)
             print('\nNew connection socket created')
         except Exception as g_exc:
-            raise BlynkException('Connection with the Blynk servers failed: {}'.format(g_exc))
+            raise BlynkException('Connection with the Blynk server failed: {}'.format(g_exc))
 
-    def _authenticate(self):
+    def _authenticate(self, max_msg_buffer):
         print('Authenticating device...')
         self.state = self._STATE_AUTHENTICATING
         self.send(self.login_msg(self.token))
-        rsp_data = self.receive(self._MAX_CMD_BUFFER, timeout=self._SOCK_MAX_TIMEOUT)
+        rsp_data = self.receive(max_msg_buffer, timeout=self._SOCK_MAX_TIMEOUT)
         if not rsp_data:
-            raise BlynkException('Auth stage timed out')
-        _, _, status, _ = self.parse_response(rsp_data)
+            raise BlynkException('Auth stage timeout')
+        _, _, status, _ = self.parse_response(rsp_data, max_msg_buffer)
         if status != self._STATUS_SUCCESS:
             if status == self._STATUS_INVALID_TOKEN:
                 raise BlynkException('Invalid Auth Token')
@@ -221,15 +210,15 @@ class Connection(Protocol):
         self.state = self._STATE_AUTHENTICATED
         print('Access granted.')
 
-    def _set_heartbeat(self):
-        self.send(self.heartbeat_msg())
-        rsp_data = self.receive(self._MAX_CMD_BUFFER, timeout=self._SOCK_MAX_TIMEOUT)
+    def _set_heartbeat(self, heartbeat, max_msg_buffer):
+        self.send(self.heartbeat_msg(heartbeat, max_msg_buffer))
+        rsp_data = self.receive(max_msg_buffer, timeout=self._SOCK_MAX_TIMEOUT)
         if not rsp_data:
             raise BlynkException('Heartbeat reply timeout')
-        _, _, status, _ = self.parse_response(rsp_data)
+        _, _, status, _ = self.parse_response(rsp_data, max_msg_buffer)
         if status != self._STATUS_SUCCESS:
             raise BlynkException('Set heartbeat reply code= {}'.format(status))
-        print("Heartbeat period = {} sec.\nHappy Blynking!\n".format(self._HEARTBEAT_PERIOD))
+        print("Heartbeat = {} sec. Max cmd buffer = {} bytes.".format(heartbeat, max_msg_buffer))
 
     def connected(self):
         return True if self.state == self._STATE_AUTHENTICATED else False
@@ -241,18 +230,20 @@ class Blynk(Connection):
     CONNECT_CALL_TIMEOUT = const(30)  # 30sec
 
     VPIN_WILDCARD = '*'
-    READ_VPIN_EVENT_BASENAME = 'read V'
-    WRITE_VPIN_EVENT_BASENAME = 'write V'
+    READ_VPIN_EVENT_BASENAME = 'read v'
+    WRITE_VPIN_EVENT_BASENAME = 'write v'
     INTERNAL_EVENT_BASENAME = 'internal_'
     CONNECT_EVENT = 'connect'
     DISCONNECT_EVENT = 'disconnect'
     READ_ALL_VPIN_EVENT = '{}{}'.format(READ_VPIN_EVENT_BASENAME, VPIN_WILDCARD)
     WRITE_ALL_VPIN_EVENT = '{}{}'.format(WRITE_VPIN_EVENT_BASENAME, VPIN_WILDCARD)
 
-    def __init__(self, token, server=BLYNK_SERVER, port=BLYNK_HTTP_PORT, ssl=False):
+    def __init__(self, token, server=BLYNK_SERVER, port=BLYNK_HTTP_PORT, heartbeat=10, max_msg_buffer=1024, ssl=False):
         self.token = token
         self.server = server
         self.port = port
+        self.heartbeat = heartbeat
+        self.max_msg_buffer = max_msg_buffer
         self.ssl = ssl
         self.state = self._STATE_DISCONNECTED
         self._start_time = ticks_ms()
@@ -262,20 +253,15 @@ class Blynk(Connection):
         self.events = {}
         print(LOGO)
 
-    def config(self, token, server=BLYNK_SERVER, port=BLYNK_HTTP_PORT, ssl=False):
-        self.token = token
-        self.server = server
-        self.port = port
-        self.ssl = ssl
-
     def connect(self, timeout=CONNECT_CALL_TIMEOUT):
         end_time = time.time() + timeout
         while not self.connected():
             try:
                 if self.state == self._STATE_DISCONNECTED:
                     self._get_socket(self.ssl_flag)
-                    self._authenticate()
-                    self._set_heartbeat()
+                    self._authenticate(self.max_msg_buffer)
+                    self._set_heartbeat(self.heartbeat, self.max_msg_buffer)
+                    print('Registered events:\n{}\nHappy Blynking!\n'.format(self.events.keys()))
                     self.call_handler(self.CONNECT_EVENT)
                     return True
             except BlynkException as b_exc:
@@ -314,12 +300,12 @@ class Blynk(Connection):
             def __init__(self, func):
                 self.func = func
                 # wildcard 'read V*' and 'write V*' events handling
-                if str(event_name) in (blynk.READ_ALL_VPIN_EVENT, blynk.WRITE_ALL_VPIN_EVENT):
+                if str(event_name).lower() in (blynk.READ_ALL_VPIN_EVENT, blynk.WRITE_ALL_VPIN_EVENT):
                     event_base_name = str(event_name).split(blynk.VPIN_WILDCARD)[0]
                     for i in range(1, blynk._VIRTUAL_PIN_MAX_NUM + 1):
-                        blynk.events['{}{}'.format(event_base_name, i)] = func
+                        blynk.events['{}{}'.format(event_base_name.lower(), i)] = func
                 else:
-                    blynk.events[str(event_name)] = func
+                    blynk.events[str(event_name).lower()] = func
 
             def __call__(self):
                 return self.func()
@@ -327,8 +313,8 @@ class Blynk(Connection):
         return Decorator
 
     def call_handler(self, event, *args, **kwargs):
-        print("Event: ['{}'] -> {}".format(event, args))
         if event in self.events.keys():
+            print("Event: ['{}'] -> {}".format(event, args))
             self.events[event](*args, **kwargs)
 
     def process(self, msg_type, msg_id, msg_len, msg_args):
@@ -339,10 +325,10 @@ class Blynk(Connection):
         elif msg_type in (self._MSG_HW, self._MSG_BRIDGE):
             if len(msg_args) >= 2:
                 if msg_args[0] == 'vw':
-                    self.call_handler("{}{}".format(self.WRITE_VPIN_EVENT_BASENAME, msg_args[1]), msg_args[1],
+                    self.call_handler("{}{}".format(self.WRITE_VPIN_EVENT_BASENAME, msg_args[1]), int(msg_args[1]),
                                       msg_args[2:])
                 elif msg_args[0] == 'vr':
-                    self.call_handler("{}{}".format(self.READ_VPIN_EVENT_BASENAME, msg_args[1]), msg_args[1])
+                    self.call_handler("{}{}".format(self.READ_VPIN_EVENT_BASENAME, msg_args[1]), int(msg_args[1]))
         elif msg_type == self._MSG_INTERNAL:
             if len(msg_args) >= 2:
                 self.call_handler("{}{}".format(self.INTERNAL_EVENT_BASENAME, msg_args[1]), msg_args[2:])
@@ -352,12 +338,12 @@ class Blynk(Connection):
             self.connect()
         else:
             try:
-                rsp_data = self.receive(self._MAX_CMD_BUFFER, self._SOCK_CONNECTION_TIMEOUT)
+                rsp_data = self.receive(self.max_msg_buffer, self._SOCK_CONNECTION_TIMEOUT)
                 self._last_receive_time = ticks_ms()
                 if rsp_data:
-                    msg_type, msg_id, h_data, msg_args = self.parse_response(rsp_data)
+                    msg_type, msg_id, h_data, msg_args = self.parse_response(rsp_data, self.max_msg_buffer)
                     self.process(msg_type, msg_id, h_data, msg_args)
-                if not self.is_server_alive():
+                if not self.is_server_alive(self.heartbeat):
                     self.disconnect('Blynk server is offline')
             except KeyboardInterrupt:
                 raise

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 [WEATHER STATION EXAMPLE (DHT22; BMP180 sensors) PI3b+] =============================================================
 
@@ -123,11 +124,11 @@ class Counter:
 
 
 BLYNK_AUTH = 'YourAuthToken'
-blynk = blynklib.Blynk(BLYNK_AUTH)
+blynk = blynklib.Blynk(BLYNK_AUTH, heartbeat=15, max_msg_buffer=512)
 
 T_CRI_VALUE = 20.0  # 20.0°C
-T_CRI_COLOR = '#c0392b'
 T_CRI_MSG = 'Low TEMP!!!'
+T_CRI_COLOR = '#c0392b'
 
 T_COLOR = '#f5b041'
 H_COLOR = '#85c1e9'

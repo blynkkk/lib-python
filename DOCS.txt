@@ -1,27 +1,23 @@
 
+# todo set heartbeat
+# todo set input buffer max
 # todo to think about logging globally
-# todo separate in log re-connect events
-# todo print list of registered events
+
 # todo tweet call
-# todo MSG_REDIRECT = 41 ??
-# todo MSG_DBG_PRINT = 55 ??
 # todo add debug response statuses parse operation
-# todo lowercase for event names
+
 # todo add status handling maybe for process RSP message
 # todo add ssl support
 # todo remove heartbeat printing and event printing
 
-# todo virtual_write/read pin should be int
-
-
-# todo add invalid auth token STA_INVALID_TOKEN =(9)
-# def _authenticate(self):
 # todo eval certain repetitive expressions
 # review constants
 # todo review error handling in user callbacks
 
 
 # todo MSG_EVENT_LOG = 64
+# todo MSG_REDIRECT = 41 ??
+# todo MSG_DBG_PRINT = 55 ??
 ######################################################################################################
 # https://docs.micropython.org/en/latest/reference/constrained.html#execution-phase
 
@@ -45,6 +41,13 @@ gc.mem_free()
 10843
 6338
 
+# todo do we need config call ?
+#============================================================================
+    def config(self, token, server=BLYNK_SERVER, port=BLYNK_HTTP_PORT, ssl=False):
+        self.token = token
+        self.server = server
+        self.port = port
+        self.ssl = ssl
 
 #=============================================================================
 # def connected(self):
