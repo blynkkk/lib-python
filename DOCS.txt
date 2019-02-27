@@ -1,17 +1,17 @@
 
-# todo set heartbeat
-# todo set input buffer max
-# todo to think about logging globally
+# todo 'get socket' add specific exception
+# todo _SOCK_CONNECTION_TIMEOUT = 0.05
+# todo think about protocol messages compact
 
+# todo clarify internal messages usage
+# todo to think about logging globally
+# todo remove heartbeat printing and event printing
 # todo tweet call
 # todo add debug response statuses parse operation
-
 # todo add status handling maybe for process RSP message
 # todo add ssl support
-# todo remove heartbeat printing and event printing
 
 # todo eval certain repetitive expressions
-# review constants
 # todo review error handling in user callbacks
 
 
