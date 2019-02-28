@@ -24,19 +24,6 @@
 gpio readall
 http://wiringpi.com/download-and-install/
 
-https://github.com/adafruit/Adafruit_Python_DHT/blob/master/examples/simpletest.py
-
-git clone https://github.com/micropython/micropython.git
-cd micropython/
-make
-./mpy-cross --help
-./mpy-cross <input_py_file>
-*.mpy file will be created that can be imported in the same way as common py libs
-
-to use heapsize
-import gc
-gc.collect()
-gc.mem_free()
 
 10843
 6338

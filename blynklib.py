@@ -169,9 +169,8 @@ class Connection(Protocol):
         except (IOError, OSError) as err:
             if str(err) == self.SOCK_TIMEOUT_MSG:
                 return rcv_buffer
-            if isinstance(err, int):
-                if int(err) in (self.ERR_EAGAIN, self.ERR_ETIMEDOUT):
-                    return rcv_buffer
+            if any([str(err_code) in str(err) for err_code in (self.ERR_EAGAIN, self.ERR_ETIMEDOUT)]):
+                return rcv_buffer
             raise
 
     def is_server_alive(self):
