@@ -5,7 +5,7 @@ if [ ! -z "$2" ]
   then
     PYTHON=$1
     EXAMPLE=$2
-    export PYTHONPATH=$PROJECT_ROOT
+    export PYTHONPATH=$PROJECT_ROOT:$PYTHONPATH
     if [ ! -f "$EXAMPLE" ]
       then
         echo "'$EXAMPLE' example not found"
