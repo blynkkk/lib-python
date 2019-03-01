@@ -25,7 +25,7 @@ gpio readall
 http://wiringpi.com/download-and-install/
 
 
-10843
+10843 - > 10668
 6338
 
 # todo do we need config call ?

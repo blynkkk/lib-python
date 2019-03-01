@@ -56,6 +56,6 @@
     obtained value can be used for mpy-cross:
         ex. ./mpy-cross -X heapsize=2812256 blynklib.py
 
-    value in the same manner can be placed to libs with ampy as usual *.py file
+    *.mpy files in the same manner can be placed to libs with ampy as usual *.py file
         ampy put blynklib.mpy /lib/blynklib.mpy
 
