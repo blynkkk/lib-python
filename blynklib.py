@@ -1,6 +1,7 @@
-# Copyright (c) 2015-2019 Volodymyr Shymanskyy. See the file LICENSE for copying permission.
 # Copyright (c) 2019 Anton Morozenko
-VERSION = '0.2.2'
+# Copyright (c) 2015-2019 Volodymyr Shymanskyy. See the file LICENSE for copying permission.
+
+__version__ = '0.2.2'
 
 try:
     import usocket as socket
@@ -28,7 +29,7 @@ LOGO = """
        / _ )/ /_ _____  / /__
       / _  / / // / _ \\/  '_/
      /____/_/\\_, /_//_/_/\\_\\
-            /___/ for Python v{}\n""".format(VERSION)
+            /___/ for Python v{}\n""".format(__version__)
 
 
 class BlynkException(Exception):
@@ -82,7 +83,7 @@ class Protocol(object):
         return msg_type, msg_id, h_data, msg_args
 
     def heartbeat_msg(self, heartbeat, rcv_buffer):
-        return self._pack_msg(self.MSG_INTERNAL, 'ver', VERSION, 'buff-in', rcv_buffer, 'h-beat', heartbeat,
+        return self._pack_msg(self.MSG_INTERNAL, 'ver', __version__, 'buff-in', rcv_buffer, 'h-beat', heartbeat,
                               'dev', 'python')
 
     def login_msg(self, token):

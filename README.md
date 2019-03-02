@@ -17,7 +17,7 @@ Blynk is **the most popular IoT platform** used by design studios, makers, educa
 Optionally: **Blynk [Server](https://github.com/blynkkk/blynk-server)**. Public Blynk Cloud is free for anyone who is using Blynk for personal (non-commercial) purposes.
 
 
-# [Installation][blynk-installation]
+## Installation 
 
 #### Installation via Python pip
 
@@ -25,12 +25,22 @@ Optionally: **Blynk [Server](https://github.com/blynkkk/blynk-server)**. Public 
 sudo pip install blynklib   
 ```
 
-#### Manual installation via Python
+#### Manual installation 
 
 ```bash
 git clone https://github.com/blynkkk/lib-python.git
 cd lib-python
-sudo python setup.py install
+pip install --user -e .
+
+# sudo pip install -e .  # if installation needed not for current but for all users 
+```
+
+#### Testing
+You can run unit tests using the command:
+```bash
+python setup.py test
 ```
 
 
+### License
+This project is released under The MIT License (MIT)
