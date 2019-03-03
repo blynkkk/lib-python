@@ -37,8 +37,11 @@ You can run unit tests using the command:
     python setup.py test
 
 ## Features
-Library allows to communicate with public or custom [Blynk Server][blynk-server]. 
-Supports Python2/Python3/Micropython. HW support of RaspberryPi/Esp32
+Library allows to communicate with public or custom [Blynk Server][blynk-server].
+ 
+Supports Python2/Python3/Micropython.
+
+HW support of RaspberryPi/ESP32
 
 ##### List of available operations:
  - connect/disconnect events subscribe
@@ -63,41 +66,28 @@ import blynklib
 BLYNK_AUTH = '<YourAuthToken>'
 blynk = blynklib.Blynk(BLYNK_AUTH)
 
-# register handler for succesful device connect to server
-@blynk.handle_event("connect")
-def connect_handler():
-    print('Connect to Blynk server successful!')
-   
-    # user code goes here
-    # ...
-    # For example power on/re-init sensors etc
-
 # register handler for virtual pin V11 reading
-# for example when some widget gets data from virtual pin once per 10 seconds    
+# for example when some Blynk App widget asks virtual pin data from server periodically    
 @blynk.handle_event('read V11')
 def read_virtual_pin_handler(pin):
     
-    # user code goes here
+    # user code for this event goes here
     # ...
-    # For example calculate, get sensor values etc
+    # Example: calculate, get sensor values, current time etc
     
-    # update value on server 
+    # update current virtual pin value on server 
     blynk.virtual_write(pin, <USER_CALCULATED_VALUE>)
+    # or any other pin if needed
+    # blynk.virtual_write(24, "<ANY_OTHER_USER_CALCULATED_VALUE>)
+        
+    # actions if value become CRITICAL
     if <USER_CALCULATED_VALUE>  >= <USER_DEFINED_CRITICAL_VALUE>
+        # set red color for widget that performs periodical virtual pin read operations
         blynk.set_property(pin, 'color', '#FF0000')
+        # send internal notification to Blynk App and notification to defined e-mail 
         blynk.notify('Warning critical value')
         blynk.email(<Your e-mail>, 'Device alarm', 'Critical value!')
         
-# register handler for when device was disconnected from server
-@blynk.handle_event("disconnect")
-def connect_handler():
-    print('Device was disconnected')
-   
-    # user code goes here
-    # ...
-    # For example power off sensors, try to recconect etc
-
-    
 # main loop that starts program and handles registered events
 while True:
     blynk.run()
@@ -115,7 +105,7 @@ This project is released under The MIT License (MIT)
   [blynk-architecture]: https://github.com/blynkkk/blynkkk.github.io/blob/master/images/architecture.png
   [blynk-banner]: https://github.com/blynkkk/blynkkk.github.io/blob/master/images/GithubBanner.jpg
   [blynk-server]: https://github.com/blynkkk/blynk-server
-  [blynk-server-public]: blynk-cloud.com
+  [blynk-server-public]: http://blynk-cloud.com
   [blynk-docs]: https://docs.blynk.cc/
   [blynk-py-examples]: https://github.com/blynkkk/lib-python/blob/master/examples
   [blynk-app-android]: https://play.google.com/store/apps/details?id=cc.blynk

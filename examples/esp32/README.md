@@ -46,7 +46,10 @@
    boards    cd        cp        edit      filesize  help      mkdir     rm        shell 
    ```
  - **[repl][micropython-repl]** command will start micropython interactive shell.
-   Also this shell can be used for board soft reboots(Ctrl+D). Hard reboots can be done by board "rst" button.
+ 
+   Also this shell can be used for board soft reboots(Ctrl+D).
+    
+   Hard reboots can be done by board "RST" button.
    
    
 ## Board files/directories operations
@@ -64,12 +67,12 @@
 
 ## Micropython libraries compiltation 
 
-Micropython provides ability to compile source code into .mpy frozen module file
-Main advantage of this that .mpy files will consume less RAM compared
+Micropython provides ability to compile source code into **.mpy** frozen module file
+Main advantage of this that **.mpy** files will consume less RAM compared
 to raw Python .py source files 
 
-For .mpy file compilation you need:
- - get [mpy-cross][micropython-mpy-cross] tool
+For **.mpy** file compilation you need:
+ - get **[mpy-cross][micropython-mpy-cross]** tool
    ```bash
    git clone https://github.com/micropython/micropython.git
    cd micropython/mpy-cross
@@ -91,7 +94,7 @@ For .mpy file compilation you need:
    ```bash
    ampy put blynklib.mpy /lib/blynklib.mpy
    ```
-   and imported within user scripts
+   and then imported within user scripts as usual .py lib
    ```python
    # start of user script
    import blynklib
