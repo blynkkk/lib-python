@@ -5,7 +5,7 @@
 
  - download latest micropython [firmware][micropython-download] for your board
  - on your host system install python3 
- - install [esptool][micropython-esptool], [rshell][micropython-rshell], [ampy][micropython-ampy] on your host to communicate with esp32 board
+ - install **[esptool][micropython-esptool]**, **[rshell][micropython-rshell]**, **[ampy][micropython-ampy]** on your host to communicate with esp32 board
     ```bash
     # Example on Linux 
     sudo pip3 install esptool
@@ -31,7 +31,7 @@
     
  - burn new firmware
    ```bash
-    esptool.py --chip esp32 --port /dev/ttyUSB0 write_flash -z 0x1000 <your esp32 firmware .bin>
+    esptool.py --chip esp32 --port /dev/ttyUSB0 write_flash -z 0x1000 [your esp32 firmware .bin]
    ```
 
 ## Board CLI
@@ -67,7 +67,7 @@
 
 ## Micropython libraries compiltation 
 
-Micropython provides ability to compile source code into **.mpy** frozen module file
+Micropython provides ability to compile source code into **.mpy** frozen module file. 
 Main advantage of this that **.mpy** files will consume less RAM compared
 to raw Python .py source files 
 
@@ -98,7 +98,26 @@ For **.mpy** file compilation you need:
    ```python
    # start of user script
    import blynklib
-   ```              
+   ```
+
+## Wifi Connection
+Micropython allows to use core ***network*** module for WiFi connection setup. 
+
+In script just place:
+```python
+import network
+
+WIFI_SSID = 'YourWifiSSID'
+WIFI_PASS = 'YourWifiPassword'
+
+wifi = network.WLAN(network.STA_IF)
+wifi.active(True)
+wifi.connect(WIFI_SSID, WIFI_PASS)
+
+# check if board connected 
+connect_status = wifi.isconnected()
+
+```               
   
  
   [esp32]: http://esp32.net

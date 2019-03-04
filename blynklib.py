@@ -32,6 +32,10 @@ LOGO = """
             /___/ for Python v{}\n""".format(__version__)
 
 
+def stub_log(*args):
+    pass
+
+
 class BlynkException(Exception):
     pass
 
@@ -104,6 +108,9 @@ class Protocol(object):
     def email_msg(self, to, subject, body):
         return self._pack_msg(self.MSG_EMAIL, to, subject, body)
 
+    def tweet_msg(self, msg):
+        return self._pack_msg(self.MSG_TWEET, msg)
+
     def notify_msg(self, msg):
         return self._pack_msg(self.MSG_NOTIFY, msg)
 
@@ -131,12 +138,13 @@ class Connection(Protocol):
     _last_ping_time = 0
     _last_send_time = 0
 
-    def __init__(self, token, server='blynk-cloud.com', port=80, heartbeat=10, rcv_buffer=1024):
+    def __init__(self, token, server='blynk-cloud.com', port=80, heartbeat=10, rcv_buffer=1024, log=stub_log):
         self.token = token
         self.server = server
         self.port = port
         self.heartbeat = heartbeat
         self.rcv_buffer = rcv_buffer
+        self.log = log
 
     def _set_socket_timeout(self, timeout):
         if getattr(self._socket, 'settimeout', None):
@@ -181,7 +189,7 @@ class Connection(Protocol):
             return False
         if (ping_delta > h_beat_ms // 10) and (send_delta > h_beat_ms or rcv_delta > h_beat_ms):
             self.send(self.ping_msg())
-            print('Heartbeat time: {}'.format(now))
+            self.log('Heartbeat time: {}'.format(now))
             self._last_ping_time = now
         return True
 
@@ -191,12 +199,12 @@ class Connection(Protocol):
             self._socket = socket.socket()
             self._socket.connect(socket.getaddrinfo(self.server, self.port)[0][4])
             self._set_socket_timeout(self.SOCK_TIMEOUT)
-            print('\nConnected to blynk server')
+            self.log('Connected to blynk server')
         except Exception as g_exc:
             raise BlynkException('Connection with the Blynk server failed: {}'.format(g_exc))
 
     def _authenticate(self):
-        print('Authenticating device...')
+        self.log('Authenticating device...')
         self._state = self.AUTHENTICATING
         self.send(self.login_msg(self.token))
         rsp_data = self.receive(self.rcv_buffer, self.SOCK_MAX_TIMEOUT)
@@ -208,7 +216,7 @@ class Connection(Protocol):
                 raise BlynkException('Invalid Auth Token')
             raise BlynkException('Auth stage failed. Status={}'.format(status))
         self._state = self.AUTHENTICATED
-        print('Access granted')
+        self.log('Access granted')
 
     def _set_heartbeat(self):
         self.send(self.heartbeat_msg(self.heartbeat, self.rcv_buffer))
@@ -218,7 +226,7 @@ class Connection(Protocol):
         _, _, status, _ = self.parse_response(rcv_data, self.rcv_buffer)
         if status != self.STATUS_OK:
             raise BlynkException('Set heartbeat reply code= {}'.format(status))
-        print('Heartbeat = {} sec. MaxCmdBuffer = {} bytes'.format(self.heartbeat, self.rcv_buffer))
+        self.log('Heartbeat = {} sec. MaxCmdBuffer = {} bytes'.format(self.heartbeat, self.rcv_buffer))
 
     def connected(self):
         return True if self._state == self.AUTHENTICATED else False
@@ -253,7 +261,7 @@ class Blynk(Connection):
                     self._get_socket()
                     self._authenticate()
                     self._set_heartbeat()
-                    print('Registered events: {}\nHappy Blynking!\n'.format(list(self._events.keys())))
+                    self.log('Registered events: {}\n'.format(list(self._events.keys())))
                     self.call_handler(self._CONNECT)
                     return True
                 except BlynkException as b_exc:
@@ -267,7 +275,7 @@ class Blynk(Connection):
             self._socket.close()
         self._state = self.DISCONNECTED
         if err_msg:
-            print('[ERROR]: {}\nConnection closed'.format(err_msg))
+            self.log('[ERROR]: {}\nConnection closed'.format(err_msg))
         time.sleep(self.RECONNECT_SLEEP)
         self.call_handler(self._DISCONNECT)
 
@@ -279,6 +287,9 @@ class Blynk(Connection):
 
     def email(self, to, subject, body):
         return self.send(self.email_msg(to, subject, body))
+
+    def tweet(self, msg):
+        return self.send(self.tweet_msg(msg))
 
     def notify(self, msg):
         return self.send(self.notify_msg(msg))
@@ -305,12 +316,12 @@ class Blynk(Connection):
 
     def call_handler(self, event, *args, **kwargs):
         if event in self._events.keys():
-            print("Event: ['{}'] -> {}".format(event, args))
+            self.log("Event: ['{}'] -> {}".format(event, args))
             self._events[event](*args, **kwargs)
 
     def process(self, msg_type, msg_id, msg_len, msg_args):
         if msg_type == self.MSG_RSP:
-            print(msg_len)
+            self.log('Response status: {}'.format(msg_len))
         elif msg_type == self.MSG_PING:
             self.send(self.response_msg(self.STATUS_OK, msg_id=msg_id))
         elif msg_type in (self.MSG_HW, self.MSG_BRIDGE, self.MSG_INTERNAL):
@@ -336,5 +347,4 @@ class Blynk(Connection):
             except KeyboardInterrupt:
                 raise
             except Exception as g_exc:
-                print(g_exc)
-                self.disconnect(g_exc)
+                self.log(g_exc)
