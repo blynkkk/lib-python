@@ -1,7 +1,7 @@
 # Copyright (c) 2019 Anton Morozenko
 # Copyright (c) 2015-2019 Volodymyr Shymanskyy. See the file LICENSE for copying permission.
 
-__version__ = '0.2.2'
+__version__ = '0.1.1'
 
 try:
     import usocket as socket
