@@ -4,7 +4,7 @@
 Environment prepare:
 In your Blynk App project:
   - add "Slider" widget,
-  - bind it to Virtual Pin V4,
+  - bind it to Virtual Pin V7,
   - set values range 0-255
   - add "Twitter Settings" widget
   - connect via this widget to your twitter account.
@@ -79,8 +79,9 @@ WRITE_EVENT_PRINT_MSG = "[WRITE_VIRTUAL_PIN_EVENT] Pin: V{} Value: '{}'"
 TWEET_MSG = "New value='{}' on VPIN({})"
 
 
-# register handler for virtual pin V7 write event
-@blynk.handle_event('write V7')
+# register handler for all virtual pins (including V7).
+# So in one block here we can handle evens for vpins 0-32 (32 - Max allowed VPIN number in lib)
+@blynk.handle_event('write V*')
 def write_virtual_pin_handler(pin, value):
     _log.info(WRITE_EVENT_PRINT_MSG.format(pin, value))
     blynk.tweet(TWEET_MSG.format(pin, value))

@@ -78,9 +78,9 @@ def read_virtual_pin_handler(pin):
     # update current virtual pin value on server 
     blynk.virtual_write(pin, <USER_CALCULATED_VALUE>)
     # or any other pin if needed
-    # blynk.virtual_write(24, "<ANY_OTHER_USER_CALCULATED_VALUE>)
+    # blynk.virtual_write(24, '<ANY_OTHER_USER_CALCULATED_VALUE>')
         
-    # actions if value become CRITICAL
+    # actions if calculated value become CRITICAL
     if <USER_CALCULATED_VALUE>  >= <USER_DEFINED_CRITICAL_VALUE>
         # set red color for widget that performs periodical virtual pin read operations
         blynk.set_property(pin, 'color', '#FF0000')
