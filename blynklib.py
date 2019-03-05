@@ -72,7 +72,10 @@ class Protocol(object):
 
     def parse_response(self, rsp_data, msg_buffer):
         msg_args = []
-        msg_type, msg_id, h_data = struct.unpack('!BHH', rsp_data[:self.MSG_HEAD_LEN])
+        try:
+            msg_type, msg_id, h_data = struct.unpack('!BHH', rsp_data[:self.MSG_HEAD_LEN])
+        except Exception as p_err:
+            raise BlynkException('Message parse error: {}'.format(p_err))
         if msg_id == 0:
             raise BlynkException('invalid msg_id == 0')
         elif h_data >= msg_buffer:

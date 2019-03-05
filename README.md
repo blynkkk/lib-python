@@ -50,7 +50,8 @@ HW support of RaspberryPi/ESP32
  - [virtual pin][blynk-vpins] sync
  - internal app notifications
  - email notifications
- - set widget property
+ - twitter notifications
+ - widget properties modification
  
 
 ## [Quickstart][blynk-docs]
