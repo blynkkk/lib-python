@@ -158,10 +158,10 @@ class Connection(Protocol):
             p.poll(int(timeout * 1000))
 
     def send(self, data):
-        retry_num = 0
-        while retry_num <= self.RETRIES_TX_MAX_NUM:
+        retries = self.RETRIES_TX_MAX_NUM
+        while retries > 0:
             try:
-                retry_num += 1
+                retries -= 1
                 self._last_send_time = ticks_ms()
                 return self._socket.send(data)
             except (IOError, OSError):
