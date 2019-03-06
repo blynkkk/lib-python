@@ -43,6 +43,8 @@ Optionally you can install **Blynk [Local Server][blynk-server]** and run everyt
    ``` 
    To exclude compatibility issue preferable versions are Python 2.7.9 (or greater) or Python 3.4 (or greater)
    If python not present you can download and install it from [here][python-org]. 
+   
+   Note! To run python in "sandbox" you can try **virtualenv** module. Examine [this link][virtual-env] how to do it.
       
  - If you’re using preferable versions of python mentioned above, then **pip** comes installed with Python by default. 
    Check pip availability:
@@ -69,6 +71,14 @@ pip install --user -e .
 You can run unit tests on Python systems using the command:
 
     python setup.py test
+
+***Note! Micropython tests currently not implemented***
+
+#### Micropython installation
+For some platforms it is possible to install **[Micropython][[micropython-org]]** package.
+This maybe helpful to do preliminary testing and debugging of your code outside real hardware. Supported platforms 
+and related installation docs can be found [here][micropython-pkg].
+
 
 ## Features
 Library allows to communicate with public or local [Blynk Server][blynk-server].
@@ -178,3 +188,6 @@ This project is released under The MIT License (MIT)
   [blynk-app-ios]: https://itunes.apple.com/us/app/blynk-control-arduino-raspberry/id808760481?ls=1&mt=8
   [blynk-vpins]: http://help.blynk.cc/getting-started-library-auth-token-code-examples/blynk-basics/what-is-virtual-pins
   [python-org]: https://www.python.org/downloads/
+  [micropython-org]: https://micropython.org/ 
+  [micropython-pkg]: https://github.com/micropython/micropython/wiki/Getting-Started
+  [virtual-env]: https://virtualenv.pypa.io/en/latest/installation/

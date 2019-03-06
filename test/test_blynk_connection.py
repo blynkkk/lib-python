@@ -42,6 +42,12 @@ class TestBlynkConnection:
             result = cb.send('1234')
             assert result is None
 
+    def test_send_socket_timeout(self, cb, mocker):
+        cb._socket = socket.socket()
+        with mocker.patch('socket.socket.send', side_effect=socket.timeout()):
+            result = cb.send('1234')
+            assert result is None
+
     # todo python 3 issue investigate
     # TypeError: descriptor '__getattribute__' requires a '_socket.socket' object but received a 'type'
     # def test_send_error_retry_count(self, cb, mocker):
@@ -62,6 +68,13 @@ class TestBlynkConnection:
         cb._socket = socket.socket()
         with mocker.patch.object(cb, '_set_socket_timeout', return_value=None):
             with mocker.patch('socket.socket.recv', side_effect=OSError('timed out')):
+                result = cb.receive(10, 1)
+                assert result == b''
+
+    def test_receive_timeout_2(self, cb, mocker):
+        cb._socket = socket.socket()
+        with mocker.patch.object(cb, '_set_socket_timeout', return_value=None):
+            with mocker.patch('socket.socket.recv', side_effect=socket.timeout('timed out')):
                 result = cb.receive(10, 1)
                 assert result == b''
 
