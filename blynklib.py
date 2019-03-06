@@ -225,10 +225,10 @@ class Connection(Protocol):
         self.send(self.heartbeat_msg(self.heartbeat, self.rcv_buffer))
         rcv_data = self.receive(self.rcv_buffer, self.SOCK_MAX_TIMEOUT)
         if not rcv_data:
-            raise BlynkException('Heartbeat reply timeout')
+            raise BlynkException('Heartbeat stage timeout')
         _, _, status, _ = self.parse_response(rcv_data, self.rcv_buffer)
         if status != self.STATUS_OK:
-            raise BlynkException('Set heartbeat reply code= {}'.format(status))
+            raise BlynkException('Set heartbeat returned code={}'.format(status))
         self.log('Heartbeat = {} sec. MaxCmdBuffer = {} bytes'.format(self.heartbeat, self.rcv_buffer))
 
     def connected(self):

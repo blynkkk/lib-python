@@ -107,8 +107,8 @@ class TestBlynkProtocol:
         assert result == b'\x06\x00\x02\x00\x00'
 
     def test_response_msg(self, pb):
-        result = pb.response_msg(200)
-        assert result == b'\x00\x00\x02\x00\x03200'
+        result = pb.response_msg(202)
+        assert result == b'\x00\x00\x02\x00\x03202'
 
     def test_virtual_write_msg(self, pb):
         result = pb.virtual_write_msg(127, 'abc', 123)

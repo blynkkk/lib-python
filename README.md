@@ -44,7 +44,7 @@ Optionally you can install **Blynk [Local Server][blynk-server]** and run everyt
    To exclude compatibility issue preferable versions are Python 2.7.9 (or greater) or Python 3.4 (or greater)
    If python not present you can download and install it from [here][python-org]. 
       
- - If you’re using preferable veriosn of python mentioned above, then **pip** comes installed with Python by default. 
+ - If you’re using preferable versions of python mentioned above, then **pip** comes installed with Python by default. 
    Check pip availability:
    ```commandline
    pip --version
