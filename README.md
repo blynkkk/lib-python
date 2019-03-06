@@ -1,10 +1,21 @@
 # Blynk Python Library
 Blynk Python/Micropython Library
 
+TODO: BADGES
+If you like **Blynk** - give it a star, or fork it and contribute! 
+[![GitHub stars](https://img.shields.io/github/stars/blynkkk/blynk-library.svg?style=social&label=Star)](https://github.com/blynkkk/blynk-library/stargazers) 
+[![GitHub forks](https://img.shields.io/github/forks/blynkkk/blynk-library.svg?style=social&label=Fork)](https://github.com/blynkkk/blynk-library/network)
+__________
+
 ## What is Blynk?
-**[Blynk][blynk-io]** provides **iOS** and **Android** apps to control any hardware **over the Internet** or **directly using Bluetooth**.
-You can easily build graphic interfaces for all your projects by simply dragging and dropping widgets, **right on your smartphone**.
-Blynk is **the most popular IoT platform** used by design studios, makers, educators, and equipment vendors all over the world.
+### Blynk is **the most popular Internet of Things platform** for connecting hardware to the cloud, designing apps to control them, and managing your deployed products at scale. 
+
+- With Blynk Library you can connect **over 400 hardware models** (including ESP8266, ESP32, NodeMCU, all Arduinos, Raspberry Pi, Particle, Texas Instruments, etc.)to the Blynk Cloud.
+Full list of supported hardware can be found [here](https://github.com/blynkkk/blynkkk.github.io/blob/master/SupportedHardware.md).
+
+- With Blynk apps for **iOS** and **Android** apps you can easily build graphic interfaces for all of your projects by simply dragging and dropping widgets on your smartphone. It's a purely WYSIWG experience: no coding on iOS or Android required. 
+
+- Hardware can connect to Blynk Cloud (open-source server) over the Internet using hardware connectivity on board, or with the use of various shields (Ethernet, WiFi, GSM, LTE, etc). Blynk Cloud is available for every user of Blynk **for free**. Local connection between over Bluetooth is also possible. 
 
 ![Blynk Banner][blynk-banner]
 
@@ -14,7 +25,7 @@ Blynk is **the most popular IoT platform** used by design studios, makers, educa
 [<img src="https://cdn.rawgit.com/simple-icons/simple-icons/develop/icons/googleplay.svg" width="18" height="18" /> Google Play][blynk-app-android] | 
 [<img src="https://cdn.rawgit.com/simple-icons/simple-icons/develop/icons/apple.svg" width="18" height="18" /> App Store][blynk-app-ios]**
 
-Optionally: **[Blynk Server][blynk-server]**. Public Blynk Cloud is free for anyone who is using Blynk for personal (non-commercial) purposes.
+Optionally you can install **Blynk [Local Server](https://github.com/blynkkk/blynk-server)** and run everything locally. However, **Blynk Cloud is free** for anyone who is using Blynk for personal (non-commercial) use.
 
 ![Blynk Architecture][blynk-architecture]
 
