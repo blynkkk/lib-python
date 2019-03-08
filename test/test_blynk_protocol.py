@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import sys
 import pytest
 from blynklib import Protocol, BlynkException
 
@@ -41,12 +42,14 @@ class TestBlynkProtocol:
         result = pb._pack_msg(msg_type, *args)
         assert result == b'\x0f\x00\x02\x00\x00'
 
-    # todo python2 compatibility issue
-    # def test_pack_msg_unicode(self, pb):
-    #     msg_type = 20
-    #     args = ["ёж"]
-    #     result = pb._pack_msg(msg_type, *args)
-    #     assert result == b'\x14\x00\x02\x00\x04\xd1\x91\xd0\xb6'
+    def test_pack_msg_unicode(self, pb):
+        if sys.version_info[0] == 2:
+            pytest.skip('Python2 unicode compatibility issue')
+
+        msg_type = 20
+        args = ["ёж"]
+        result = pb._pack_msg(msg_type, *args)
+        assert result == b'\x14\x00\x02\x00\x04\xd1\x91\xd0\xb6'
 
     def test_parse_response_msg_hw(self, pb):
         data = b'\x14\x00\x02\x00\x13test\x001234\x00745\x00abcde'

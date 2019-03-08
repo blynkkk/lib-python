@@ -48,14 +48,12 @@ class TestBlynkConnection:
             result = cb.send('1234')
             assert result is None
 
-    # todo python 3 issue investigate
-    # TypeError: descriptor '__getattribute__' requires a '_socket.socket' object but received a 'type'
-    # def test_send_error_retry_count(self, cb, mocker):
-    #     cb._socket = socket.socket()
-    #     with mocker.patch('socket.socket.send', side_effect=OSError('OS')):
-    #         mocker.spy(socket.socket, 'send')
-    #         cb.send('1234')
-    #         assert cb._socket.send.call_count == 3
+    def test_send_error_retry_count(self, cb, mocker):
+        cb._socket = socket.socket()
+        with mocker.patch('socket.socket.send', side_effect=OSError('OS')):
+            mocker.spy(time, 'sleep')
+            cb.send('1234')
+            assert cb._socket.send.call_count == 3
 
     def test_receive(self, cb, mocker):
         cb._socket = socket.socket()
@@ -123,14 +121,14 @@ class TestBlynkConnection:
         assert result is True
 
     def test_get_socket(self, cb, mocker):
-        with mocker.patch.object(cb, '_set_socket_timeout', return_value=None):
-            with mocker.patch('socket.socket.connect', return_value=None):
+        with mocker.patch('socket.socket'):
+            with mocker.patch('socket.getaddrinfo'):
                 cb._get_socket()
                 assert cb._state == cb.CONNECTING
 
     def test_get_socket_exception(self, cb, mocker):
-        with mocker.patch.object(cb, '_set_socket_timeout', return_value=None):
-            with mocker.patch('socket.socket.connect', side_effect=BlynkException('BE')):
+        with mocker.patch('socket.socket'):
+            with mocker.patch('socket.getaddrinfo', side_effect=BlynkException('BE')):
                 with pytest.raises(BlynkException) as b_exc:
                     cb._get_socket()
                 assert 'Connection with the Blynk server failed: BE' in str(b_exc)
