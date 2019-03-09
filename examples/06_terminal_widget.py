@@ -63,7 +63,7 @@ BLYNK_AUTH = 'YourAuthToken'
 
 # last command in example - just to show error handling
 # for certain HW can be added specific commands. 'gpio readall' on PI3b for example
-ALLOWED_COMMANDS_LIST = ['ls', 'lsusb', 'ip a', 'ip abc']  # '
+ALLOWED_COMMANDS_LIST = ['ls', 'lsusb', 'ip a', 'ip abc']
 
 blynk = blynklib.Blynk(BLYNK_AUTH)
 
