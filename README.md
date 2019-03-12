@@ -68,14 +68,14 @@ pip install --user -e .
 ``` 
 
 #### Testing
-You can run unit tests on Python systems using the command:
+You can run unit tests on cPython systems using the command:
 
     python setup.py test
 
-***Note! Micropython tests currently not implemented***
+***Note! Unit Tests for Micropython ENV currently not implemented***
 
 #### Micropython installation
-For some platforms it is possible to install **[Micropython][[micropython-org]]** package.
+For some platforms it is possible to install **[Micropython][micropython-org]** package.
 This maybe helpful to do preliminary testing and debugging of your code outside real hardware. Supported platforms 
 and related installation docs can be found [here][micropython-pkg].
 
