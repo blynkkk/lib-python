@@ -118,7 +118,7 @@ Examine [this document][blynk-esp32-readme] to get more details how to compile *
 ***Note!!*** During custom firmware creation your libraries will be converted and adopted to esp8266 environment
 automatically. So you can create custom build and then just copy *.mpy files from docker system 
 ```bash
-docker cp micropython:/micropython/ports/esp8266/build/frozen_mpy/blinklib.mpy blinklib.mpy
+docker cp micropython:/micropython/ports/esp8266/build/frozen_mpy/blynklib.mpy blynklib.mpy
 ```
 
 After *.mpy files can be placed to **/lib** directory of esp8266 board with **ampy** tool and simply imported
