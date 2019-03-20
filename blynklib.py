@@ -1,7 +1,8 @@
 # Copyright (c) 2019 Anton Morozenko
-# Copyright (c) 2015-2019 Volodymyr Shymanskyy. See the file LICENSE for copying permission.
+# Copyright (c) 2015-2019 Volodymyr Shymanskyy.
+# See the file LICENSE for copying permission.
 
-__version__ = '0.1.1'
+__version__ = '0.2.4'
 
 try:
     import usocket as socket
@@ -36,7 +37,7 @@ def stub_log(*args):
     pass
 
 
-class BlynkException(Exception):
+class BlynkError(Exception):
     pass
 
 
@@ -75,18 +76,18 @@ class Protocol(object):
         try:
             msg_type, msg_id, h_data = struct.unpack('!BHH', rsp_data[:self.MSG_HEAD_LEN])
         except Exception as p_err:
-            raise BlynkException('Message parse error: {}'.format(p_err))
+            raise BlynkError('Message parse error: {}'.format(p_err))
         if msg_id == 0:
-            raise BlynkException('invalid msg_id == 0')
+            raise BlynkError('invalid msg_id == 0')
         elif h_data >= msg_buffer:
-            raise BlynkException('Command too long. Length = {}'.format(h_data))
+            raise BlynkError('Command too long. Length = {}'.format(h_data))
         elif msg_type in (self.MSG_RSP, self.MSG_PING, self.MSG_INTERNAL):
             pass
         elif msg_type in (self.MSG_HW, self.MSG_BRIDGE):
             msg_body = rsp_data[self.MSG_HEAD_LEN: self.MSG_HEAD_LEN + h_data]
             msg_args = [itm.decode('utf-8') for itm in msg_body.split(b'\0')]
         else:
-            raise BlynkException("Unknown message type: '{}'".format(msg_type))
+            raise BlynkError("Unknown message type: '{}'".format(msg_type))
         return msg_type, msg_id, h_data, msg_args
 
     def heartbeat_msg(self, heartbeat, rcv_buffer):
@@ -204,7 +205,7 @@ class Connection(Protocol):
             self._set_socket_timeout(self.SOCK_TIMEOUT)
             self.log('Connected to blynk server')
         except Exception as g_exc:
-            raise BlynkException('Connection with the Blynk server failed: {}'.format(g_exc))
+            raise BlynkError('Connection with the Blynk server failed: {}'.format(g_exc))
 
     def _authenticate(self):
         self.log('Authenticating device...')
@@ -212,12 +213,12 @@ class Connection(Protocol):
         self.send(self.login_msg(self.token))
         rsp_data = self.receive(self.rcv_buffer, self.SOCK_MAX_TIMEOUT)
         if not rsp_data:
-            raise BlynkException('Auth stage timeout')
+            raise BlynkError('Auth stage timeout')
         _, _, status, _ = self.parse_response(rsp_data, self.rcv_buffer)
         if status != self.STATUS_OK:
             if status == self.STATUS_INVALID_TOKEN:
-                raise BlynkException('Invalid Auth Token')
-            raise BlynkException('Auth stage failed. Status={}'.format(status))
+                raise BlynkError('Invalid Auth Token')
+            raise BlynkError('Auth stage failed. Status={}'.format(status))
         self._state = self.AUTHENTICATED
         self.log('Access granted')
 
@@ -225,10 +226,10 @@ class Connection(Protocol):
         self.send(self.heartbeat_msg(self.heartbeat, self.rcv_buffer))
         rcv_data = self.receive(self.rcv_buffer, self.SOCK_MAX_TIMEOUT)
         if not rcv_data:
-            raise BlynkException('Heartbeat stage timeout')
+            raise BlynkError('Heartbeat stage timeout')
         _, _, status, _ = self.parse_response(rcv_data, self.rcv_buffer)
         if status != self.STATUS_OK:
-            raise BlynkException('Set heartbeat returned code={}'.format(status))
+            raise BlynkError('Set heartbeat returned code={}'.format(status))
         self.log('Heartbeat = {} sec. MaxCmdBuffer = {} bytes'.format(self.heartbeat, self.rcv_buffer))
 
     def connected(self):
@@ -267,8 +268,8 @@ class Blynk(Connection):
                     self.log('Registered events: {}\n'.format(list(self._events.keys())))
                     self.call_handler(self._CONNECT)
                     return True
-                except BlynkException as b_exc:
-                    self.disconnect(b_exc)
+                except BlynkError as b_err:
+                    self.disconnect(b_err)
                     sleep_ms(self.TASK_PERIOD_RES)
             if time.time() >= end_time:
                 return False
@@ -349,5 +350,8 @@ class Blynk(Connection):
                     self.disconnect('Blynk server is offline')
             except KeyboardInterrupt:
                 raise
+            except BlynkError as b_err:
+                self.log(b_err)
+                self.disconnect()
             except Exception as g_exc:
                 self.log(g_exc)
