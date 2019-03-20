@@ -3,7 +3,7 @@ from __future__ import print_function
 import time
 import pytest
 import socket
-from blynklib import Connection, BlynkException
+from blynklib import Connection, BlynkError
 
 
 class TestBlynkConnection:
@@ -128,10 +128,10 @@ class TestBlynkConnection:
 
     def test_get_socket_exception(self, cb, mocker):
         with mocker.patch('socket.socket'):
-            with mocker.patch('socket.getaddrinfo', side_effect=BlynkException('BE')):
-                with pytest.raises(BlynkException) as b_exc:
+            with mocker.patch('socket.getaddrinfo', side_effect=BlynkError('BE')):
+                with pytest.raises(BlynkError) as b_err:
                     cb._get_socket()
-                assert 'Connection with the Blynk server failed: BE' in str(b_exc)
+                assert 'Connection with the Blynk server failed: BE' in str(b_err)
 
     def test_authenticate(self, cb, mocker):
         with mocker.patch.object(cb, 'send', return_value=None):
@@ -142,37 +142,37 @@ class TestBlynkConnection:
     def test_authenticate_invalid_auth_token(self, cb, mocker):
         with mocker.patch.object(cb, 'send', return_value=None):
             with mocker.patch.object(cb, 'receive', return_value=b'\x00\x00\x02\x00\x09'):
-                with pytest.raises(BlynkException) as b_exc:
+                with pytest.raises(BlynkError) as b_err:
                     cb._authenticate()
-                assert 'Invalid Auth Token' in str(b_exc)
+                assert 'Invalid Auth Token' in str(b_err)
 
     def test_authenticate_not_ok_status(self, cb, mocker):
         with mocker.patch.object(cb, 'send', return_value=None):
             with mocker.patch.object(cb, 'receive', return_value=b'\x00\x00\x02\x00\x19'):
-                with pytest.raises(BlynkException) as b_exc:
+                with pytest.raises(BlynkError) as b_err:
                     cb._authenticate()
-                assert 'Auth stage failed. Status=25' in str(b_exc)
+                assert 'Auth stage failed. Status=25' in str(b_err)
 
     def test_authenticate_timeout(self, cb, mocker):
         with mocker.patch.object(cb, 'send', return_value=None):
             with mocker.patch.object(cb, 'receive', return_value=None):
-                with pytest.raises(BlynkException) as b_exc:
+                with pytest.raises(BlynkError) as b_err:
                     cb._authenticate()
-                assert 'Auth stage timeout' in str(b_exc)
+                assert 'Auth stage timeout' in str(b_err)
 
     def test_set_heartbeat_timeout(self, cb, mocker):
         with mocker.patch.object(cb, 'send', return_value=None):
             with mocker.patch.object(cb, 'receive', return_value=None):
-                with pytest.raises(BlynkException) as b_exc:
+                with pytest.raises(BlynkError) as b_err:
                     cb._set_heartbeat()
-                assert 'Heartbeat stage timeout' in str(b_exc)
+                assert 'Heartbeat stage timeout' in str(b_err)
 
     def test_set_heartbeat_error_status(self, cb, mocker):
         with mocker.patch.object(cb, 'send', return_value=None):
             with mocker.patch.object(cb, 'receive', return_value=b'\x00\x00\x02\x00\x0e'):
-                with pytest.raises(BlynkException) as b_exc:
+                with pytest.raises(BlynkError) as b_err:
                     cb._set_heartbeat()
-                assert 'Set heartbeat returned code=14' in str(b_exc)
+                assert 'Set heartbeat returned code=14' in str(b_err)
 
     def test_set_heartbeat_positive(self, cb, mocker):
         with mocker.patch.object(cb, 'send', return_value=None):

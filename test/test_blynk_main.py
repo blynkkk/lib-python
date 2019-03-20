@@ -2,7 +2,7 @@
 from __future__ import print_function
 import socket
 import pytest
-from blynklib import Blynk, BlynkException
+from blynklib import Blynk, BlynkError
 
 
 class TestBlynk:
@@ -23,7 +23,7 @@ class TestBlynk:
     def test_connect_exception(self, bl, mocker):
         with mocker.patch.object(bl, 'connected', return_value=False):
             with mocker.patch.object(bl, '_get_socket', return_value=None):
-                with mocker.patch.object(bl, '_authenticate', side_effect=BlynkException()):
+                with mocker.patch.object(bl, '_authenticate', side_effect=BlynkError()):
                     with mocker.patch.object(bl, 'disconnect', return_value=None):
                         with mocker.patch('time.sleep', return_value=None):
                             mocker.spy(bl, 'disconnect')

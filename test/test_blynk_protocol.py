@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys
 import pytest
-from blynklib import Protocol, BlynkException
+from blynklib import Protocol, BlynkError
 
 
 class TestBlynkProtocol:
@@ -60,16 +60,16 @@ class TestBlynkProtocol:
     def test_parse_response_msg_id_0(self, pb):
         data = b'\x14\x00\x00\x00\x13test\x001234\x00745\x00abcde'
         msg_buffer = 100
-        with pytest.raises(BlynkException) as exc:
+        with pytest.raises(BlynkError) as b_err:
             pb.parse_response(data, msg_buffer)
-        assert 'invalid msg_id == 0' == str(exc.value)
+        assert 'invalid msg_id == 0' == str(b_err.value)
 
     def test_parse_response_more_data_than_buffer(self, pb):
         data = b'\x14\x00\x02\x00\x13test\x001234\x00745\x00abcde'
         msg_buffer = 10
-        with pytest.raises(BlynkException) as exc:
+        with pytest.raises(BlynkError) as b_err:
             pb.parse_response(data, msg_buffer)
-        assert 'Command too long' in str(exc.value)
+        assert 'Command too long' in str(b_err.value)
 
     def test_parse_response_msg_ping(self, pb):
         data = b'\x06\x00\x04\x00\x13test\x001234\x00745\x00abcde'
@@ -87,9 +87,9 @@ class TestBlynkProtocol:
     def test_parse_response_wrong_msg_type(self, pb):
         data = b'\x86\x00\x04\x00\x13test\x001234\x00745\x00abcde'
         msg_buffer = 100
-        with pytest.raises(BlynkException) as exc:
+        with pytest.raises(BlynkError) as b_err:
             pb.parse_response(data, msg_buffer)
-        assert "Unknown message type: '134'" in str(exc.value)
+        assert "Unknown message type: '134'" in str(b_err.value)
 
     def test_parse_response_msg_hw_unicode(self, pb):
         data = b'\x14\x00\x02\x00\x04\xd1\x91\xd0\xb6'
@@ -99,7 +99,7 @@ class TestBlynkProtocol:
 
     def test_heartbeat_msg(self, pb):
         result = pb.heartbeat_msg(20, 2048)
-        assert result == b'\x11\x00\x02\x00+ver\x000.1.1\x00buff-in\x002048\x00h-beat\x0020\x00dev\x00python'
+        assert result == b'\x11\x00\x02\x00+ver\x000.2.4\x00buff-in\x002048\x00h-beat\x0020\x00dev\x00python'
 
     def test_login_msg(self, pb):
         result = pb.login_msg('1234')
