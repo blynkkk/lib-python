@@ -1,40 +1,20 @@
 # Blynk Python Library
 Provides API for [Blynk Server][blynk-server] communication and messaging on IoT/desktop systems with Micropython/Python support. 
-
-[![GitHub version](https://img.shields.io/github/release/blynkkk/lib-python.svg)][lib-release]
-[![GitHub download](https://img.shields.io/github/downloads/blynkkk/lib-python/total.svg)][lib-release]
-[![GitHub stars](https://img.shields.io/github/stars/blynkkk/lib-python.svg)][lib-stars]
-[![GitHub issues](https://img.shields.io/github/issues/blynkkk/lib-python.svg)][lib-issues]
-[![Build Status](https://img.shields.io/travis/blynkkk/lib-python.svg)][lib-travis]
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)][lib-licence]
-
-If you like **Blynk** - give it a star, or fork it and contribute! 
-[![GitHub stars](https://img.shields.io/github/stars/blynkkk/lib-python.svg?style=social&label=Star)][lib-stars] 
-[![GitHub forks](https://img.shields.io/github/forks/blynkkk/lib-python.svg?style=social&label=Fork)][lib-network]
 __________
 
-### Blynk is **the most popular Internet of Things platform** for connecting hardware to the cloud, designing apps to control them, and managing your deployed products at scale. 
+### Blynk is **the most popular Internet of Things platform** for connecting hardware to the cloud, designing apps to control them, and managing your deployed devices at scale. 
 
 - With Blynk Library you can connect **over 400 hardware models** (including ESP8266, ESP32, NodeMCU, all Arduinos, Raspberry Pi, Particle, Texas Instruments, etc.)to the Blynk Cloud.
 Full list of supported hardware can be found [here][blynk-hw].
 
 - With Blynk apps for **iOS** and **Android** apps you can easily build graphic interfaces for all of your projects by simply dragging and dropping widgets on your smartphone. It's a purely WYSIWG experience: no coding on iOS or Android required. 
 
-- Hardware can connect to Blynk Cloud (open-source server) over the Internet using hardware connectivity on board, or with the use of various shields (Ethernet, WiFi, GSM, LTE, etc). Blynk Cloud is available for every user of Blynk **for free**. Direct connection over Bluetooth is also possible. 
+- Hardware can connect to Blynk Cloud (open-source server) over the Internet using hardware connectivity on board, or with the use of various shields (Ethernet, WiFi, GSM, LTE, etc). Blynk Cloud is available for every user of Blynk **for free**. 
 
 ![Blynk Banner][blynk-banner]
 
-## Download
 
-**Blynk App: 
-[<img src="https://cdn.rawgit.com/simple-icons/simple-icons/develop/icons/googleplay.svg" width="18" height="18" /> Google Play][blynk-app-android] | 
-[<img src="https://cdn.rawgit.com/simple-icons/simple-icons/develop/icons/apple.svg" width="18" height="18" /> App Store][blynk-app-ios]**
-
-Optionally you can install **Blynk [Local Server][blynk-server]** and run everything locally. However, **Blynk Cloud is free** for anyone who is using Blynk for personal (non-commercial) use.
-
-![Blynk Architecture][blynk-architecture]
-
-## Installation 
+## Installation of Blynk Python Library 
 
 #### Installation via python pip
  - Check python availability in your system. 
@@ -75,8 +55,8 @@ You can run unit tests on cPython systems using the command:
 ***Note! Unit Tests for Micropython ENV currently not implemented***
 
 #### Micropython installation
-For some platforms it is possible to install **[Micropython][micropython-org]** package.
-This maybe helpful to do preliminary testing and debugging of your code outside real hardware. Supported platforms 
+Some hardware platforms can use **[Micropython][micropython-org]** package.
+This is helpful for preliminary testing and debugging of your code outside of real hardware. Supported platforms 
 and related installation docs can be found [here][micropython-pkg].
 
 
@@ -88,21 +68,31 @@ Supports Python2/Python3/Micropython.
 HW support of RaspberryPi/ESP32
 
 ##### List of available operations:
- - connect/disconnect events subscribe
- - read/write [virtual pins][blynk-vpins] events subscribe
+ - subscribe to connect/disconnect events 
+ - subscribe to read/write events of [virtual pins][blynk-vpins]
  - [virtual pin][blynk-vpins] write
  - [virtual pin][blynk-vpins] sync
- - internal app notifications
- - email notifications
- - twitter notifications
- - widget properties modification
+ - send mobile app push notifications
+ - send email notifications
+ - send twitter notifications
+ - change certain widget properties
  
 
 ## Quickstart 
-Install Blynk python  library
-Download Blynk App ([GooglePlay][blynk-app-android] | [Apple][blynk-app-ios]) and register within it. 
-When you create a new project in Blynk app, you will get Auth Token delivered to your inbox. Use this Auth Token within your python scripts to authenticate your device on
-[public][blynk-server-public] or [local][blynk-server]
+Install Blynk python library
+
+Install Blynk App: 
+[<img src="https://cdn.rawgit.com/simple-icons/simple-icons/develop/icons/googleplay.svg" width="18" height="18" /> Google Play][blynk-app-android] | 
+[<img src="https://cdn.rawgit.com/simple-icons/simple-icons/develop/icons/apple.svg" width="18" height="18" /> App Store][blynk-app-ios]**
+
+- Create new account in Blynk app using your email address
+- Create a new Project in Blynk app 
+- You will get Auth Token delivered to your email account. 
+- Put this Auth Token within your python script to authenticate your device on [public][blynk-server-public] or [local][blynk-server]
+
+```py
+BLYNK_AUTH = '<YourAuthToken>' #insert your Auth Token here
+```
 
 #### Usage example
 ```py
@@ -115,29 +105,26 @@ blynk = blynklib.Blynk(BLYNK_AUTH)
 # from __future__ import print_function
 # blynk = blynklib.Blynk(BLYNK_AUTH, server='blynk-cloud.com', port=80, heartbeat=10, rcv_buffer=1024, log=print)
 
-# register handler for Virtual Pin V22 reading
+# register handler for Virtual Pin V22 reading.
 # for example when a widget in Blynk App asks Virtual Pin data from server within given interval    
 @blynk.handle_event('read V22')
 def read_virtual_pin_handler(pin):
     
-    # user code for this event goes here
+    # your code goes here
     # ...
-    # Example: calculate, get sensor values, current time etc
+    # Example: get sensor value, perform calculations, etc
     sensor_data = '<YourCalculatedSensorData>'
     critilcal_data_value = '<YourCriticalSensorValue>'
         
-    # update current Virtual Pin value on server 
-    blynk.virtual_write(pin, sensor_data)
-    # or any other pin if needed
-    # blynk.virtual_write(24, sensor_data)
+    # send value to Virtual Pin and store it in Blynk Cloud 
+    blynk.virtual_write(pin, sensor_data) #example: blynk.virtual_write(24, sensor_data)
         
-    # actions if calculated value become CRITICAL
+    # you can perform actions if value reaches a threshold (e.g. some critical value)
     if sensor_data >= critilcal_data_value
-        # set red color for widget that performs periodical virtual pin read operations
-        blynk.set_property(pin, 'color', '#FF0000')
-        # send internal notification to Blynk App and notification to defined e-mail 
-        blynk.notify('Warning critical value')
-        blynk.email(<Your e-mail>, 'Device alarm', 'Critical value!')
+        
+        blynk.set_property(pin, 'color', '#FF0000') # set red color for the widget UI element 
+        blynk.notify('Warning critical value') # send push notification to Blynk App 
+        blynk.email(<youremail@email.com>, 'Email Subject', 'Email Body') # send email to specified address
         
 # main loop that starts program and handles registered events
 while True:
@@ -145,7 +132,7 @@ while True:
 ```
 ## More Examples
 
-Examine **[more_examples][blynk-py-examples]** to be familiar with basic features usage.
+Learn **[more_examples][blynk-py-examples]** to get familiar with basic features usage.
 
 #### Examples List:
 
@@ -158,7 +145,7 @@ Examine **[more_examples][blynk-py-examples]** to be familiar with basic feature
 - 06_terminal_widget.py (App communication with device through terminal widget)
 - 07_tweet_and_logging.py (Tweet messaging and library logging options)
 
-##### Raspberry:
+##### Raspberry Pi (any):
 - 01_weather_station_pi3b.py (DHT22; BMP180 sensors usage)
 
 ##### ESP32
