@@ -1,5 +1,5 @@
 # Blynk Python Library
-This Blynk library provides API to connect IoT hardware that supports Micropython/Python to Blynk Cloud and communiate with Blynk apps (iOS and Android). You can send raw and processed sensor data to Blynk app and remotely control anything that is connected to your hardware (relays, motors, servos) from anywhere.  
+This library provides API to connect IoT hardware that supports Micropython/Python to Blynk Cloud and communiate with Blynk apps (iOS and Android). You can send raw and processed sensor data and remotely control anything that is connected to your hardware (relays, motors, servos) from anywhere in the world.  
 
 ![Blynk Banner][blynk-banner]
 ### Blynk is **the most popular Internet of Things platform** for connecting hardware to the cloud, designing apps to control them, and managing your deployed devices at scale. 
@@ -79,11 +79,10 @@ This library supports Python2, Python3, and Micropython.
  
 
 ## Quickstart 
-Install Blynk python library
-
-Install Blynk App: 
+1. Install Blynk python library as described above
+2. Install Blynk App: 
 [<img src="https://cdn.rawgit.com/simple-icons/simple-icons/develop/icons/googleplay.svg" width="18" height="18" /> Google Play][blynk-app-android] | 
-[<img src="https://cdn.rawgit.com/simple-icons/simple-icons/develop/icons/apple.svg" width="18" height="18" /> App Store][blynk-app-ios]**
+[<img src="https://cdn.rawgit.com/simple-icons/simple-icons/develop/icons/apple.svg" width="18" height="18" /> App Store][blynk-app-ios]
 
 - Create new account in Blynk app using your email address
 - Create a new Project in Blynk app 
@@ -178,3 +177,4 @@ This project is released under The MIT License (MIT)
   [micropython-org]: https://micropython.org/ 
   [micropython-pkg]: https://github.com/micropython/micropython/wiki/Getting-Started
   [virtual-env]: https://virtualenv.pypa.io/en/latest/installation/
+  [python-logo]: 
