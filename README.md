@@ -1,5 +1,5 @@
 # Blynk Python Library
-Provides API for [Blynk Server][blynk-server] communication and messaging on IoT/desktop systems with Micropython/Python support. 
+This Blynk library provides API to connect IoT hardware that supports Micropython/Python to Blynk Cloud and communiate with Blynk apps (iOS and Android). You can send raw and processed sensor data to Blynk app and remotely control anything that is connected to your hardware (relays, motors, servos) from anywhere.  
 __________
 
 ### Blynk is **the most popular Internet of Things platform** for connecting hardware to the cloud, designing apps to control them, and managing your deployed devices at scale. 
@@ -24,7 +24,7 @@ Full list of supported hardware can be found [here][blynk-hw].
    To exclude compatibility issue preferable versions are Python 2.7.9 (or greater) or Python 3.4 (or greater)
    If python not present you can download and install it from [here][python-org]. 
    
-   Note! To run python in "sandbox" you can try **virtualenv** module. Examine [this link][virtual-env] how to do it.
+   **NOTE:** To run python in "sandbox" you can try **virtualenv** module. Check [here][virtual-env] on how to do it.
       
  - If you’re using preferable versions of python mentioned above, then **pip** comes installed with Python by default. 
    Check pip availability:
@@ -52,7 +52,7 @@ You can run unit tests on cPython systems using the command:
 
     python setup.py test
 
-***Note! Unit Tests for Micropython ENV currently not implemented***
+**NOTE:** Unit tests for Micropython ENV are not available yet.
 
 #### Micropython installation
 Some hardware platforms can use **[Micropython][micropython-org]** package.
