@@ -1,7 +1,7 @@
 # Blynk Python Library
 This Blynk library provides API to connect IoT hardware that supports Micropython/Python to Blynk Cloud and communiate with Blynk apps (iOS and Android). You can send raw and processed sensor data to Blynk app and remotely control anything that is connected to your hardware (relays, motors, servos) from anywhere.  
-__________
 
+![Blynk Banner][blynk-banner]
 ### Blynk is **the most popular Internet of Things platform** for connecting hardware to the cloud, designing apps to control them, and managing your deployed devices at scale. 
 
 - With Blynk Library you can connect **over 400 hardware models** (including ESP8266, ESP32, NodeMCU, all Arduinos, Raspberry Pi, Particle, Texas Instruments, etc.)to the Blynk Cloud.
@@ -11,7 +11,7 @@ Full list of supported hardware can be found [here][blynk-hw].
 
 - Hardware can connect to Blynk Cloud (open-source server) over the Internet using hardware connectivity on board, or with the use of various shields (Ethernet, WiFi, GSM, LTE, etc). Blynk Cloud is available for every user of Blynk **for free**. 
 
-![Blynk Banner][blynk-banner]
+
 
 
 ## Installation of Blynk Python Library 
