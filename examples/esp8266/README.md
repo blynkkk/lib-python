@@ -82,7 +82,7 @@ There are two ways to achieve this:
 Frozen modules store the Python source with the firmware.
 
 For custom esp8266 firmware build creation:
- - install docker to your host system. How to do it under different OS you may read [here][docker-install]  
+ - install docker to your host system. Steps how to do it under different OS described [here][docker-install]  
  - clone with git esp8266 docker repository. Virtual environment will be needed for firmware build operation.
     ```bash
    git clone https://github.com/enqack/docker-esp8266-micropython.git
@@ -100,7 +100,7 @@ For custom esp8266 firmware build creation:
    ```
  - follow **[this][esp8266-build-docker]** instructions to build and copy custom esp8266 firmware.
    
-   Build process may take some time ~ 15-40 minutes.
+   Build process can take some time ~ 15-40 minutes.
   
  - after firmware created and copied locally - you can try to burn it with **esptool** to your ESP8266 board.
  - connect to board CLI with **rshell** and test **blynklib** availability within **repl**

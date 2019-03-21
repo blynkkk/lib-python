@@ -27,7 +27,7 @@ A small and affordable computer that you can use to learn programming
    ```      
 ## Security
 
-Protect your device and to avoid situations when it may be used without your permission.
+Protect your device and to avoid situations when it can be used without your permission.
 
 Read this [guide][raspberry-security] to understand how to impove rasberry Pi security.
  

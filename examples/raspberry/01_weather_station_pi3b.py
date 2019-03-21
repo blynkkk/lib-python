@@ -11,7 +11,7 @@ DHT22 sensor:
     - connect DATA sensor line to board GPIO17
     - pip install Adafruit-DHT
 
-    DHT22 datasheet that may be helpful:
+    DHT22 datasheet that can be helpful:
     https://www.sparkfun.com/datasheets/Sensors/Temperature/DHT22.pdf
 
 
@@ -32,7 +32,7 @@ BMP180 sensor:
           cd Adafruit_Python_BMP
           sudo python setup.py install
 
-    BMP180 datasheet that may be helpful:
+    BMP180 datasheet that can be helpful:
     https://arduino.ua/docs/BMP085_DataSheet_Rev.1.0_01July2008.pdf
 
 

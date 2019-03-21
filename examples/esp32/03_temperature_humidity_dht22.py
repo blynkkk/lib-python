@@ -10,7 +10,7 @@ DHT22 sensor:
     - connect GND sensor line to "ground" board pin
     - connect DATA sensor line to board GPIO 4
 
-    DHT22 datasheet that may be helpful:
+    DHT22 datasheet that can be helpful:
     https://www.sparkfun.com/datasheets/Sensors/Temperature/DHT22.pdf
 
 Environment prepare:
