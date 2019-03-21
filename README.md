@@ -177,4 +177,3 @@ This project is released under The MIT License (MIT)
   [micropython-org]: https://micropython.org/ 
   [micropython-pkg]: https://github.com/micropython/micropython/wiki/Getting-Started
   [virtual-env]: https://virtualenv.pypa.io/en/latest/installation/
-  [python-logo]: 
