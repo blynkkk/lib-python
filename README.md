@@ -61,21 +61,21 @@ and related installation docs can be found [here][micropython-pkg].
 
 
 ## Features
-Library allows to communicate with public or local [Blynk Server][blynk-server].
- 
-Supports Python2/Python3/Micropython.
+This library supports Python2, Python3, and Micropython.
 
-HW support of RaspberryPi/ESP32
+- Communication with public or local [Blynk Server][blynk-server].
+- Exchange any data between your hardware and app
+- Tested to work with: Raspberry Pi (any), ESP32, ESP8266
 
 ##### List of available operations:
- - subscribe to connect/disconnect events 
- - subscribe to read/write events of [virtual pins][blynk-vpins]
- - [virtual pin][blynk-vpins] write
- - [virtual pin][blynk-vpins] sync
- - send mobile app push notifications
- - send email notifications
- - send twitter notifications
- - change certain widget properties
+ - Subscribe to connect/disconnect events 
+ - Subscribe to read/write events of [virtual pins][blynk-vpins]
+ - [Virtual Pin][blynk-vpins] write
+ - [Virtual Pin][blynk-vpins] sync
+ - Send mobile app push notifications
+ - Send email notifications
+ - Send twitter notifications
+ - Change widget GUI parameters in Blynk app based on hardware input
  
 
 ## Quickstart 
@@ -130,26 +130,26 @@ def read_virtual_pin_handler(pin):
 while True:
     blynk.run()
 ```
-## More Examples
+## Other Examples
 
-Learn **[more_examples][blynk-py-examples]** to get familiar with basic features usage.
+Check **[more_examples][blynk-py-examples]** to get familiar with some of Blynk features.
 
 #### Examples List:
 
 ##### Core operations:
-- 01_write_virtual_pin.py (virtual pin write event handling)
-- 02_read_virtual_pin.py  (App read virtual pin events handling)
-- 03_connect_disconnect.py (library connect/disconnect events handling)
-- 04_email.py(send email support)               
-- 05_set_property_notify.py (changing App widget properties and send internal notifications)
-- 06_terminal_widget.py (App communication with device through terminal widget)
-- 07_tweet_and_logging.py (Tweet messaging and library logging options)
+- 01_write_virtual_pin.py (how to write to Virtual Pin )
+- 02_read_virtual_pin.py  (how to read Virtual Pin )
+- 03_connect_disconnect.py (connection management)
+- 04_email.py(how to send send email and push notifications) // TODO: combine it into one example               
+- 05_set_property_notify.py (how to change some of widget UI properties) // TODO:  move notifications to 04 example 
+- 06_terminal_widget.py (communicate between hardware and app through Terminal widget)
+- 07_tweet_and_logging.py (how to post to Twitter and log events from your hardware)
 
 ##### Raspberry Pi (any):
-- 01_weather_station_pi3b.py (DHT22; BMP180 sensors usage)
+- 01_weather_station_pi3b.py (Connect DHT22; BMP180 sensors and send data to Blynk app)
 
 ##### ESP32
-- 01_touch_button.py (TTP223B sensors usage)
+- 01_touch_button.py (Connect TTP223B touch sensor to ESP32 and react to touch)
 
 
 
