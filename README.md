@@ -1,6 +1,18 @@
 # Blynk Python Library
 This library provides API to connect IoT hardware that supports Micropython/Python to Blynk Cloud and communiate with Blynk apps (iOS and Android). You can send raw and processed sensor data and remotely control anything that is connected to your hardware (relays, motors, servos) from anywhere in the world.  
 
+[![GitHub version](https://img.shields.io/github/release/blynkkk/lib-python.svg)][lib-release]
+[![GitHub download](https://img.shields.io/github/downloads/blynkkk/lib-python/total.svg)][lib-release]
+[![GitHub stars](https://img.shields.io/github/stars/blynkkk/lib-python.svg)][lib-stars]
+[![GitHub issues](https://img.shields.io/github/issues/blynkkk/lib-python.svg)][lib-issues]
+[![Build Status](https://img.shields.io/travis/blynkkk/lib-python.svg)][lib-travis]
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)][lib-licence]
+
+If you like **Blynk** - give it a star, or fork it and contribute! 
+[![GitHub stars](https://img.shields.io/github/stars/blynkkk/lib-python.svg?style=social&label=Star)][lib-stars] 
+[![GitHub forks](https://img.shields.io/github/forks/blynkkk/lib-python.svg?style=social&label=Fork)][lib-network]
+
+
 ![Blynk Banner][blynk-banner]
 ### Blynk is **the most popular Internet of Things platform** for connecting hardware to the cloud, designing apps to control them, and managing your deployed devices at scale. 
 
@@ -99,24 +111,30 @@ import blynklib
 
 BLYNK_AUTH = '<YourAuthToken>' #insert your Auth Token here
 # base lib init
-blynk = blynklib.Blynk(BLYNK_AUTH) 
+blynk = blynklib.Blynk(BLYNK_AUTH)
+ 
 # advanced options of lib init
 # from __future__ import print_function
 # blynk = blynklib.Blynk(BLYNK_AUTH, server='blynk-cloud.com', port=80, heartbeat=10, rcv_buffer=1024, log=print)
 
-# register handler for Virtual Pin V22 reading.
-# for example when a widget in Blynk App asks Virtual Pin data from server within given interval    
+# register handler for Virtual Pin V22 reading by Blynk App.
+# when a widget in Blynk App asks Virtual Pin data from server within given configurable interval (1,2,5,10 sec etc) 
+# server automatically sends notification about read virtual pin event to hardware
+# this notification captured by current handler 
 @blynk.handle_event('read V22')
 def read_virtual_pin_handler(pin):
     
     # your code goes here
     # ...
     # Example: get sensor value, perform calculations, etc
-    sensor_data = '<YourCalculatedSensorData>'
-    critilcal_data_value = '<YourCriticalSensorValue>'
+    sensor_data = '<YourSensorData>'
+    critilcal_data_value = '<YourThresholdSensorValue>'
         
     # send value to Virtual Pin and store it in Blynk Cloud 
-    blynk.virtual_write(pin, sensor_data) #example: blynk.virtual_write(24, sensor_data)
+    blynk.virtual_write(pin, sensor_data)
+    
+    # you can define if needed any other pin
+    # example: blynk.virtual_write(24, sensor_data)
         
     # you can perform actions if value reaches a threshold (e.g. some critical value)
     if sensor_data >= critilcal_data_value
@@ -139,17 +157,29 @@ Check **[more_examples][blynk-py-examples]** to get familiar with some of Blynk 
 - 01_write_virtual_pin.py (how to write to Virtual Pin )
 - 02_read_virtual_pin.py  (how to read Virtual Pin )
 - 03_connect_disconnect.py (connection management)
-- 04_email.py(how to send send email and push notifications) // TODO: combine it into one example               
-- 05_set_property_notify.py (how to change some of widget UI properties) // TODO:  move notifications to 04 example 
-- 06_terminal_widget.py (communicate between hardware and app through Terminal widget)
+- 04_email.py(how to send send email and push notifications)                
+- 05_set_property_notify.py (how to change some of widget UI properties)  
+- 06_terminal_widget.py (communication between hardware and app through Terminal widget)
 - 07_tweet_and_logging.py (how to post to Twitter and log events from your hardware)
 
 ##### Raspberry Pi (any):
-- 01_weather_station_pi3b.py (Connect DHT22; BMP180 sensors and send data to Blynk app)
+- 01_weather_station_pi3b.py (connect DHT22; BMP180 sensors and send data to Blynk app)
 
 ##### ESP32
-- 01_touch_button.py (Connect TTP223B touch sensor to ESP32 and react to touch)
+- 01_touch_button.py (connect TTP223B touch sensor to ESP32 and react to touch)
+- 02_terminal_cli.py (communication between ESP32 hardware and app through Terminal widget)
+- 03_temperature_humidity_dht22.py (connect DHT22 sensor and send data to Blynk app)
 
+##### ESP8266
+- 01_potentiometer.py (connect slide potentiometer to ESP8266 and get resistance values) 
+
+
+
+### Memory size limitations
+For hardware with limited memory size (ex. ESP8266) you can use ***frozen modules*** or ***frozen bytecode*** approaches
+to load **blynklib** or any other library to hardware.
+  
+Read [this document][esp8266-readme] to get more information.
 
 
 ### License
@@ -177,3 +207,4 @@ This project is released under The MIT License (MIT)
   [micropython-org]: https://micropython.org/ 
   [micropython-pkg]: https://github.com/micropython/micropython/wiki/Getting-Started
   [virtual-env]: https://virtualenv.pypa.io/en/latest/installation/
+  [esp8266-readme]: https://github.com/blynkkk/lib-python/blob/master/examples/esp8266/README.md
