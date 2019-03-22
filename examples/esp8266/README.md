@@ -110,19 +110,22 @@ For custom esp8266 firmware build creation:
    ``` 
    
 
-### Frozen module inside firmware
-Frozen bytecode uses the cross compiler to convert the source to bytecode which is then stored with the firmware.
+### Frozen bytecode
+Frozen bytecode approach uses the cross compiler to convert the source to bytecode which is then stored with the firmware.
 
 Examine [this document][blynk-esp32-readme] to get more details how to compile *.py files into *.mpy bytecode
 
+After *.mpy files can be placed to **/lib** directory of esp8266 board with **ampy** tool. Libraries *.mpy can be simply imported
+in the same manner as standard *.py library
+```python
+import blynklib
+``` 
+
 ***Note!!*** During custom firmware creation your libraries will be converted and adopted to esp8266 environment
-automatically. So you can create custom build and then just copy *.mpy files from docker system 
+automatically. So you can create custom build and then just copy *.mpy files from docker system to local
 ```bash
 docker cp micropython:/micropython/ports/esp8266/build/frozen_mpy/blynklib.mpy blynklib.mpy
 ```
-
-After *.mpy files can be placed to **/lib** directory of esp8266 board with **ampy** tool and simply imported
-as standard library
 
 
 ## Wifi Connection
