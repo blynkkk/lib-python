@@ -149,9 +149,7 @@ while True:
 ```
 ## Other Examples
 
-Check **[more_examples][blynk-py-examples]** to get familiar with some of Blynk features.
-
-#### Examples List:
+Examples can be found **[here][blynk-py-examples]** Check them all to get familiar with main Blynk API features.
 
 ##### Core operations:
 - 01_write_virtual_pin.py (how to write to Virtual Pin )
