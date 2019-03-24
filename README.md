@@ -110,7 +110,8 @@ BLYNK_AUTH = '<YourAuthToken>' #insert your Auth Token here
 import blynklib
 
 BLYNK_AUTH = '<YourAuthToken>' #insert your Auth Token here
-blynk = blynklib.Blynk(BLYNK_AUTH) # base library initialization
+# base lib init
+blynk = blynklib.Blynk(BLYNK_AUTH)
  
 # advanced options of lib init
 # from __future__ import print_function
@@ -151,24 +152,24 @@ while True:
 Examples can be found **[here][blynk-py-examples]** Check them all to get familiar with main Blynk API features.
 
 ##### Core operations:
-- 01_write_virtual_pin.py (how to write to Virtual Pin )
-- 02_read_virtual_pin.py  (how to read Virtual Pin )
-- 03_connect_disconnect.py (connection management)
-- 04_email.py(how to send send email and push notifications)                
-- 05_set_property_notify.py (how to change some of widget UI properties)  
-- 06_terminal_widget.py (communication between hardware and app through Terminal widget)
-- 07_tweet_and_logging.py (how to post to Twitter and log events from your hardware)
+- [01_write_virtual_pin.py](https://github.com/blynkkk/lib-python/blob/master/examples/01_write_virtual_pin.py): How to read incoming data from Blynk app to Virtual Pin and use it in your code
+- [02_read_virtual_pin.py](https://github.com/blynkkk/lib-python/blob/master/examples/02_read_virtual_pin.py): How to update value on Virtual Pin
+- [03_connect_disconnect.py](https://github.com/blynkkk/lib-python/blob/master/examples/03_connect_disconnect.py): Managing connection with Blynk Cloud
+- [04_email.py](https://github.com/blynkkk/lib-python/blob/master/examples/04_email.py): How to send send email and push notifications from your hardware                
+- [05_set_property_notify.py](https://github.com/blynkkk/lib-python/blob/master/examples/05_set_property_notify.py): How to change some of widget UI properties like colors, labels, etc  
+- [06_terminal_widget.py](https://github.com/blynkkk/lib-python/blob/master/examples/06_terminal_widget.py): Communication between hardware and app through Terminal widget)
+- [07_tweet_and_logging.py](https://github.com/blynkkk/lib-python/blob/master/examples/07_tweet_and_logging.py): How to post to Twitter and log events from your hardware
 
 ##### Raspberry Pi (any):
-- (01_weather_station_pi3b.py)[https://github.com/blynkkk/lib-python/tree/master/examples/raspberry] Connect DHT22; BMP180 sensors and send data to Blynk app
+- 01_weather_station_pi3b.py (connect DHT22; BMP180 sensors and send data to Blynk app)
 
 ##### ESP32
-- [01_touch_button.py](https://github.com/blynkkk/lib-python/blob/master/examples/esp32/01_touch_button.py) Connect TTP223B touch sensor to ESP32 and react to touch
-- [02_terminal_cli.py](https://github.com/blynkkk/lib-python/blob/master/examples/esp32/02_terminal_cli.py) Communication between ESP32 hardware and app through Terminal widget
-- [03_temperature_humidity_dht22.py](https://github.com/blynkkk/lib-python/blob/master/examples/esp32/03_temperature_humidity_dht22.py) Connect DHT22 sensor to ESP32 and send data to Blynk app
+- 01_touch_button.py (connect TTP223B touch sensor to ESP32 and react to touch)
+- 02_terminal_cli.py (communication between ESP32 hardware and app through Terminal widget)
+- 03_temperature_humidity_dht22.py (connect DHT22 sensor and send data to Blynk app)
 
 ##### ESP8266
-- [01_potentiometer.py](https://github.com/blynkkk/lib-python/blob/master/examples/esp8266/01_potentiometer.py) Cconnect potentiometer to ESP8266 and send resistance value to the app 
+- 01_potentiometer.py (connect slide potentiometer to ESP8266 and get resistance values) 
 
 
 
