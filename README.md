@@ -179,6 +179,46 @@ to load **blynklib** or any other library to hardware.
   
 Read [this document][esp8266-readme] to get more information.
 
+## Documentation and other helpful links
+
+[Full Blynk Documentation](http://docs.blynk.cc/#blynk-firmware) - a complete guide on Blynk features
+
+[Community (Forum)](http://community.blynk.cc) - join a 500,000 Blynk community to ask questions and share ideas
+
+[Help Center](http://help.blynk.cc) - helpful articles on various Blynk aspects
+
+[Code Examples Browser](http://examples.blynk.cc) - browse examples to explore Blynk possibilities
+
+[Official Website](https://blynk.io) 
+
+**Social Media:**
+
+[Facebook](https://www.fb.com/blynkapp)
+
+[Twitter](https://twitter.com/blynk_app)
+
+[Youtube](https://www.youtube.com/blynk)
+
+[Instagram](https://www.instagram.com/blynk.iot/)
+
+[LinkedIn](https://www.linkedin.com/company/b-l-y-n-k/)
+
+
+## Blynk libraries for other platforms
+* [C++](https://github.com/blynkkk/blynk-library)
+* [Node.js, Espruino, Browsers](https://github.com/vshymanskyy/blynk-library-js)
+* [Python (by Volodymyr Shymanskiy)](https://github.com/vshymanskyy/blynk-library-python)
+* [Particle](https://github.com/vshymanskyy/blynk-library-spark)
+* [Lua, OpenWrt, NodeMCU](https://github.com/vshymanskyy/blynk-library-lua)
+* [OpenWrt packages](https://github.com/vshymanskyy/blynk-library-openwrt)
+* [MBED](https://developer.mbed.org/users/vshymanskyy/code/Blynk/)
+* [Node-RED](https://www.npmjs.com/package/node-red-contrib-blynk-ws)
+* [LabVIEW](https://github.com/juncaofish/NI-LabVIEWInterfaceforBlynk)
+* [C#](https://github.com/sverrefroy/BlynkLibrary)
+
+## Contributing
+You are very welcome to contribute: stability bugfixes, new hardware support, or any other improvements. Please.
+
 
 ### License
 This project is released under The MIT License (MIT)
