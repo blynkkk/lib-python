@@ -106,7 +106,7 @@ Schema for temperature parameter:
 =====================================================================================================================
 Additional info about blynk you can find by examining such resources:
 
-    Downloads, docs, tutorials:     http://www.blynk.cc
+    Downloads, docs, tutorials:     https://blynk.io
     Sketch generator:               http://examples.blynk.cc
     Blynk community:                http://community.blynk.cc
     Social networks:                http://www.fb.com/blynkapp
