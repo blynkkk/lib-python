@@ -161,15 +161,19 @@ Examples can be found **[here][blynk-py-examples]** Check them all to get famili
 - [07_tweet_and_logging.py](https://github.com/blynkkk/lib-python/blob/master/examples/07_tweet_and_logging.py): How to post to Twitter and log events from your hardware
 
 ##### Raspberry Pi (any):
-- 01_weather_station_pi3b.py (connect DHT22; BMP180 sensors and send data to Blynk app)
+Read [Raspberry Pi guide](https://github.com/blynkkk/lib-python/tree/master/examples/raspberry) first.
+
+- (01_weather_station_pi3b.py)[https://github.com/blynkkk/lib-python/tree/master/examples/raspberry] Connect DHT22; BMP180 sensors and send data to Blynk app
 
 ##### ESP32
-- 01_touch_button.py (connect TTP223B touch sensor to ESP32 and react to touch)
-- 02_terminal_cli.py (communication between ESP32 hardware and app through Terminal widget)
-- 03_temperature_humidity_dht22.py (connect DHT22 sensor and send data to Blynk app)
+Read [ESP32 guide](https://github.com/blynkkk/lib-python/tree/master/examples/esp32) first.
+- [01_touch_button.py](https://github.com/blynkkk/lib-python/blob/master/examples/esp32/01_touch_button.py) Connect TTP223B touch sensor to ESP32 and react to touch
+- [02_terminal_cli.py](https://github.com/blynkkk/lib-python/blob/master/examples/esp32/02_terminal_cli.py) Communication between ESP32 hardware and app through Terminal widget
+- [03_temperature_humidity_dht22.py](https://github.com/blynkkk/lib-python/blob/master/examples/esp32/03_temperature_humidity_dht22.py) Connect DHT22 sensor to ESP32 and send data to Blynk app
 
 ##### ESP8266
-- 01_potentiometer.py (connect slide potentiometer to ESP8266 and get resistance values) 
+Read [ESP8266 guide](https://github.com/blynkkk/lib-python/tree/master/examples/esp8266) first.
+- [01_potentiometer.py](https://github.com/blynkkk/lib-python/blob/master/examples/esp8266/01_potentiometer.py) Cconnect potentiometer to ESP8266 and send resistance value to the app 
 
 
 
