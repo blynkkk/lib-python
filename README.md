@@ -36,7 +36,7 @@ Full list of supported hardware can be found [here][blynk-hw].
    To exclude compatibility issue preferable versions are Python 2.7.9 (or greater) or Python 3.4 (or greater)
    If python not present you can download and install it from [here][python-org]. 
    
-   **NOTE:** To run python in "sandbox" you can try **virtualenv** module. Check [here][virtual-env] on how to do it.
+   **NOTE:** To run python in "sandbox" you can try **virtualenv** module. Check [this document][virtual-env] how to do it.
       
  - If you’re using preferable versions of python mentioned above, then **pip** comes installed with Python by default. 
    Check pip availability:
@@ -101,12 +101,12 @@ This library supports Python2, Python3, and Micropython.
 - You will get Auth Token delivered to your email account. 
 - Put this Auth Token within your python script to authenticate your device on [public][blynk-server-public] or [local][blynk-server]
 
-```py
+```python
 BLYNK_AUTH = '<YourAuthToken>' #insert your Auth Token here
 ```
 
 #### Usage example
-```py
+```python
 import blynklib
 
 BLYNK_AUTH = '<YourAuthToken>' #insert your Auth Token here
@@ -163,7 +163,7 @@ Examples can be found **[here][blynk-py-examples]** Check them all to get famili
 ##### Raspberry Pi (any):
 Read [Raspberry Pi guide](https://github.com/blynkkk/lib-python/tree/master/examples/raspberry) first.
 
-- (01_weather_station_pi3b.py)[https://github.com/blynkkk/lib-python/tree/master/examples/raspberry] Connect DHT22; BMP180 sensors and send data to Blynk app
+- [01_weather_station_pi3b.py](https://github.com/blynkkk/lib-python/blob/master/examples/raspberry/01_weather_station_pi3b.py) Connect DHT22; BMP180 sensors and send data to Blynk app
 
 ##### ESP32
 Read [ESP32 guide](https://github.com/blynkkk/lib-python/tree/master/examples/esp32) first.
@@ -197,15 +197,9 @@ Read [this document][esp8266-readme] to get more information.
 
 **Social Media:**
 
-[Facebook](https://www.fb.com/blynkapp)
+[Facebook](https://www.fb.com/blynkapp) [Twitter](https://twitter.com/blynk_app) [Youtube](https://www.youtube.com/blynk)
 
-[Twitter](https://twitter.com/blynk_app)
-
-[Youtube](https://www.youtube.com/blynk)
-
-[Instagram](https://www.instagram.com/blynk.iot/)
-
-[LinkedIn](https://www.linkedin.com/company/b-l-y-n-k/)
+[Instagram](https://www.instagram.com/blynk.iot/) [LinkedIn](https://www.linkedin.com/company/b-l-y-n-k/)
 
 
 ## Blynk libraries for other platforms
@@ -250,3 +244,4 @@ This project is released under The MIT License (MIT)
   [micropython-pkg]: https://github.com/micropython/micropython/wiki/Getting-Started
   [virtual-env]: https://virtualenv.pypa.io/en/latest/installation/
   [esp8266-readme]: https://github.com/blynkkk/lib-python/blob/master/examples/esp8266/README.md
+  [blynktimer-doc]: https://github.com/blynkkk/lib-python/blob/master/blynktimer.py
