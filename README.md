@@ -159,6 +159,7 @@ Examples can be found **[here][blynk-py-examples]** Check them all to get famili
 - [05_set_property_notify.py](https://github.com/blynkkk/lib-python/blob/master/examples/05_set_property_notify.py): How to change some of widget UI properties like colors, labels, etc  
 - [06_terminal_widget.py](https://github.com/blynkkk/lib-python/blob/master/examples/06_terminal_widget.py): Communication between hardware and app through Terminal widget)
 - [07_tweet_and_logging.py](https://github.com/blynkkk/lib-python/blob/master/examples/07_tweet_and_logging.py): How to post to Twitter and log events from your hardware
+- [08_blynk_timer.py](https://github.com/blynkkk/lib-python/blob/master/examples/08_blynk_timer.py): How send data periodically from hardware by using **[Blynk Timer][blynktimer-doc]**
 
 ##### Raspberry Pi (any):
 Read [Raspberry Pi guide](https://github.com/blynkkk/lib-python/tree/master/examples/raspberry) first.
@@ -244,4 +245,4 @@ This project is released under The MIT License (MIT)
   [micropython-pkg]: https://github.com/micropython/micropython/wiki/Getting-Started
   [virtual-env]: https://virtualenv.pypa.io/en/latest/installation/
   [esp8266-readme]: https://github.com/blynkkk/lib-python/blob/master/examples/esp8266/README.md
-  [blynktimer-doc]: https://github.com/blynkkk/lib-python/blob/master/blynktimer.py
+  [blynktimer-doc]: https://github.com/blynkkk/lib-python/blob/master/TIMERS.md
