@@ -55,14 +55,14 @@ import blynklib
 import blynktimer
 import random
 
-BLYNK_AUTH = 'YourAuthToken'
+BLYNK_AUTH = 'YourAuthToken' # insert your Auth Token here 
 blynk = blynklib.Blynk(BLYNK_AUTH)
-timer = blynktimer.Timer()
+timer = blynktimer.Timer() # create a new Timer instance
 
 WRITE_EVENT_PRINT_MSG = "[WRITE_VIRTUAL_WRITE] Pin: V{} Value: '{}'"
 
 
-# register two timers for different pins with different intervals
+# Code below: register two timers for different pins with different intervals
 # first num is delay interval in seconds
 # second num is function argument
 # run_once flag that allows run timers once or periodically
