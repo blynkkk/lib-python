@@ -21,12 +21,13 @@ from blynktimer import Timer
 blynk_timer = Timer()
 
 # run once timer that will fire after 1 sec   
-@blynk_timer.register(1, run_once=True)
+@blynk_timer.register(interval=1, run_once=True)
 def your_run_once_function():
     print('Hello, World!')
 
 # periodical timer that will fire each 5 sec
-@blynk_timer.register(5)
+# run_once flag by default is False
+@blynk_timer.register(interval=5)
 def your_periodical_function():
     print('Hello, Blynkers!')
 
@@ -45,15 +46,17 @@ blynk_timer = Timer(no_timers_err=False)
 
 
 # register two timers for single function with different function parameters
-@blynk_timer.register(2, 'p1', 'p2', c=1, run_once=True)
-@blynk_timer.register(3, 'fp1', 'fp2', run_once=False)
+@blynk_timer.register('p1', 'p2', c=1, interval=2, run_once=True)
+@blynk_timer.register('fp1', 'fp2', interval=3, run_once=False)
 def function1(a, b, c=2):
     time.sleep(c)
     print('Function params: {} {} {}'.format(a, b, c))
 
 
 # simple function registration for further stop
-@blynk_timer.register(4, run_once=False)
+# interval default = 10 sec
+# run_once default is False
+@blynk_timer.register()
 def function2():
     print('Function2')
 

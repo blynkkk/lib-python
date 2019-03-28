@@ -12,6 +12,7 @@ except ImportError:
 
 WAIT_SEC = 0.05
 MAX_TIMERS = 16
+DEFAULT_INTERVAL = 10
 
 
 class TimerError(Exception):
@@ -29,7 +30,7 @@ class Timer(object):
             return self._get_func_name(obj.func)
         return obj.__name__
 
-    def register(blynk, interval, *args, run_once=False, **kwargs):
+    def register(blynk, *args, interval=DEFAULT_INTERVAL, run_once=False, **kwargs):
         class Deco(object):
             def __init__(self, func):
                 self.func = func
