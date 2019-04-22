@@ -34,10 +34,10 @@ class Timer(object):
         class Deco(object):
             def __init__(self, func):
                 self.func = func
-                if len(Timer.timers.keys()) >= MAX_TIMERS:
+                if len(list(Timer.timers.keys())) >= MAX_TIMERS:
                     raise TimerError('Max allowed timers num={}'.format(MAX_TIMERS))
                 _timer = _Timer(interval, func, run_once, *args, **kwargs)
-                Timer.timers['{}_{}'.format(len(Timer.timers.keys()), blynk._get_func_name(func))] = _timer
+                Timer.timers['{}_{}'.format(len(list(Timer.timers.keys())), blynk._get_func_name(func))] = _timer
 
             def __call__(self, *f_args, **f_kwargs):
                 return self.func(*f_args, **f_kwargs)
