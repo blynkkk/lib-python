@@ -3,12 +3,30 @@
 Polling timers for functions.
 Registers timers and performs run once or periodical function execution after defined time intervals.
 """
+# select.select call used as polling waiter where it is possible
+# cause time.sleep sometimes may load CPU up to 100% with small polling wait interval
 try:
-    import utime as time
-    import uselect as select
-except ImportError:
+    # cpython
     import time
     import select
+
+    polling_wait = lambda x: select.select([], [], [], x)
+    polling_wait(0.01)
+except OSError:
+    # windows case where select.select call fails
+    polling_wait = lambda x: time.sleep(x)
+
+except ImportError:
+    # micropython
+    import utime as time
+
+    try:
+        from uselect import select as s_select
+
+        polling_wait = lambda x: s_select([], [], [], x)
+    except ImportError:
+        # case when micropython port does not support select.select
+        polling_wait = lambda x: time.sleep(x)
 
 WAIT_SEC = 0.05
 MAX_TIMERS = 16
@@ -63,8 +81,7 @@ class Timer(object):
         return {k: states[v.stopped] for k, v in self.timers.items()}
 
     def run(self):
-        # select call used cause time.sleep loads CPU up to 100% with small polling time
-        select.select([], [], [], WAIT_SEC)
+        polling_wait(WAIT_SEC)
         timers_intervals = [curr_timer.run() for curr_timer in Timer.timers.values() if not curr_timer.stopped]
         if not timers_intervals and self.no_timers_err:
             raise TimerError('Running timers not found')
