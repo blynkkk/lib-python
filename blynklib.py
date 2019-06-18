@@ -308,7 +308,7 @@ class Blynk(Connection):
                 # wildcard 'read V*' and 'write V*' events handling
                 if str(event_name).lower() in (blynk._VPIN_READ_ALL, blynk._VPIN_WRITE_ALL):
                     event_base_name = str(event_name).split(blynk._VPIN_WILDCARD)[0]
-                    for i in range(1, blynk.VPIN_MAX_NUM + 1):
+                    for i in range(blynk.VPIN_MAX_NUM + 1):
                         blynk._events['{}{}'.format(event_base_name.lower(), i)] = func
                 else:
                     blynk._events[str(event_name).lower()] = func
