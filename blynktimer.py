@@ -44,9 +44,12 @@ class Timer(object):
         self.no_timers_err = no_timers_err
 
     def _get_func_name(self, obj):
-        if getattr(obj, '__name__', None) is None:
+        """retrieves a suitable name for a function"""
+        if hasattr(obj, 'func'):
+            # handles nested decorators
             return self._get_func_name(obj.func)
-        return obj.__name__
+        # simply returns 'timer' if on port without function attrs
+        return getattr(obj, '__name__', 'timer')
 
     def register(blynk, *args, interval=DEFAULT_INTERVAL, run_once=False, **kwargs):
         class Deco(object):

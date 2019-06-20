@@ -66,7 +66,10 @@ print(blynk_timer.get_timers())
 
 # switch timer state to stopped by timer id
 # id = order_num + '_' + function_name
+# OR: on ports with low memory (such as the esp8266)
+# id = order_num + '_' + 'timer'
 blynk_timer.stop('2_function2')
+
 
 while True:
     intervals = blynk_timer.run()
