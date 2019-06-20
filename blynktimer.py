@@ -44,8 +44,10 @@ class Timer(object):
         self.no_timers_err = no_timers_err
 
     def _get_func_name(self, obj):
-        if getattr(obj, '__name__', None) is None:
-            return self._get_func_name(obj.func)
+        if not hasattr(obj, '__name__'):
+            if hasattr(obj, 'func'):
+                return self._get_func_name(obj.func)
+            return 'timer'
         return obj.__name__
 
     def register(blynk, *args, interval=DEFAULT_INTERVAL, run_once=False, **kwargs):
