@@ -94,7 +94,7 @@ class TestBlynk:
             pass
 
         assert 'read v10' in bl._events.keys()
-        assert len(bl._events.keys()) == bl.VPIN_MAX_NUM
+        assert len(bl._events.keys()) == bl.VPIN_MAX_NUM + 1
 
     def test_write_wildcard_event(self, bl):
         bl._events = {}
@@ -104,7 +104,7 @@ class TestBlynk:
             pass
 
         assert 'write v5' in bl._events.keys()
-        assert len(bl._events.keys()) == bl.VPIN_MAX_NUM
+        assert len(bl._events.keys()) == bl.VPIN_MAX_NUM + 1
 
     def test_call_handler(self, bl):
         bl._events = {}
