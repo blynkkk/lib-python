@@ -275,13 +275,13 @@ class Blynk(Connection):
                 return False
 
     def disconnect(self, err_msg=None):
+        self.call_handler(self._DISCONNECT)
         if self._socket:
             self._socket.close()
         self._state = self.DISCONNECTED
         if err_msg:
             self.log('[ERROR]: {}\nConnection closed'.format(err_msg))
         time.sleep(self.RECONNECT_SLEEP)
-        self.call_handler(self._DISCONNECT)
 
     def virtual_write(self, v_pin, *val):
         return self.send(self.virtual_write_msg(v_pin, *val))
@@ -336,16 +336,21 @@ class Blynk(Connection):
             elif len(msg_args) == const(2) and msg_args[0] == 'vr':
                 self.call_handler("{}{}".format(self._VPIN_READ, msg_args[1]), int(msg_args[1]))
 
+    def read_response(self, timeout=0.5):
+        end_time = time.time() + timeout
+        while time.time() <= end_time:
+            rsp_data = self.receive(self.rcv_buffer, self.SOCK_TIMEOUT)
+            self._last_rcv_time = ticks_ms()
+            if rsp_data:
+                msg_type, msg_id, h_data, msg_args = self.parse_response(rsp_data, self.rcv_buffer)
+                self.process(msg_type, msg_id, h_data, msg_args)
+
     def run(self):
         if not self.connected():
             self.connect()
         else:
             try:
-                rsp_data = self.receive(self.rcv_buffer, self.SOCK_TIMEOUT)
-                self._last_rcv_time = ticks_ms()
-                if rsp_data:
-                    msg_type, msg_id, h_data, msg_args = self.parse_response(rsp_data, self.rcv_buffer)
-                    self.process(msg_type, msg_id, h_data, msg_args)
+                self.read_response(timeout=self.SOCK_TIMEOUT)
                 if not self.is_server_alive():
                     self.disconnect('Blynk server is offline')
             except KeyboardInterrupt:

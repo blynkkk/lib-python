@@ -74,8 +74,8 @@ colors = {'#FF00FF': 'Magenta', '#00FF00': 'Lime'}
 
 @blynk.handle_event('write V5')
 def write_handler(pin, value):
-    current_color = random.choice(colors.keys())
-    blynk.set_property(pin, 'color', random.choice(colors.keys()))
+    current_color = random.choice(list(colors.keys()))
+    blynk.set_property(pin, 'color', current_color)
     blynk.notify(NOTIFY_MSG.format(colors[current_color]))
     print(NOTIFY_MSG.format(colors[current_color]))
 
