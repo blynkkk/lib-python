@@ -51,7 +51,11 @@ class Timer(object):
         # simply returns 'timer' if on port without function attrs
         return getattr(obj, '__name__', 'timer')
 
-    def register(blynk, *args, interval=DEFAULT_INTERVAL, run_once=False, **kwargs):
+    def register(blynk, *args, **kwargs):
+        # kwargs with defaults are used cause PEP 3102 no supported by Python2
+        interval = kwargs.pop('interval', DEFAULT_INTERVAL)
+        run_once = kwargs.pop('run_once', False)
+
         class Deco(object):
             def __init__(self, func):
                 self.func = func
