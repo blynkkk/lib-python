@@ -55,13 +55,14 @@ class Timer(object):
         # kwargs with defaults are used cause PEP 3102 no supported by Python2
         interval = kwargs.pop('interval', DEFAULT_INTERVAL)
         run_once = kwargs.pop('run_once', False)
+        stopped = kwargs.pop('stopped', False)
 
         class Deco(object):
             def __init__(self, func):
                 self.func = func
                 if len(list(Timer.timers.keys())) >= MAX_TIMERS:
                     raise TimerError('Max allowed timers num={}'.format(MAX_TIMERS))
-                _timer = _Timer(interval, func, run_once, *args, **kwargs)
+                _timer = _Timer(interval, func, run_once, stopped, *args, **kwargs)
                 Timer.timers['{}_{}'.format(len(list(Timer.timers.keys())), blynk._get_func_name(func))] = _timer
 
             def __call__(self, *f_args, **f_kwargs):
@@ -75,6 +76,13 @@ class Timer(object):
         if timer is None:
             raise TimerError('Timer id={} not found'.format(t_id))
         Timer.timers[t_id].stopped = True
+
+    @staticmethod
+    def start(t_id):
+        timer = Timer.timers.get(t_id, None)
+        if timer is None:
+            raise TimerError('Timer id={} not found'.format(t_id))
+        Timer.timers[t_id].stopped = False
 
     @staticmethod
     def is_stopped(t_id):
@@ -96,7 +104,7 @@ class Timer(object):
 
 
 class _Timer(object):
-    def __init__(self, interval, deco, run_once, *args, **kwargs):
+    def __init__(self, interval, deco, run_once, stopped, *args, **kwargs):
         self.interval = interval
         self.deco = deco
         self.args = args
@@ -104,7 +112,7 @@ class _Timer(object):
         self.kwargs = kwargs
         self.fire_time = None
         self.fire_time_prev = None
-        self.stopped = False
+        self.stopped = stopped
 
     def run(self):
         timer_real_interval = 0
