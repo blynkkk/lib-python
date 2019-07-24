@@ -83,6 +83,8 @@ class Timer(object):
         if timer is None:
             raise TimerError('Timer id={} not found'.format(t_id))
         Timer.timers[t_id].stopped = False
+        Timer.timers[t_id].fire_time = None
+        Timer.timers[t_id].fire_time_prev = None
 
     @staticmethod
     def is_stopped(t_id):
