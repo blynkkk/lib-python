@@ -207,7 +207,7 @@ Read [this document][esp8266-readme] to get more information.
 ## Blynk libraries for other platforms
 * [C++](https://github.com/blynkkk/blynk-library)
 * [Node.js, Espruino, Browsers](https://github.com/vshymanskyy/blynk-library-js)
-* [Python (by Volodymyr Shymanskiy)](https://github.com/vshymanskyy/blynk-library-python)
+* [Python](https://github.com/vshymanskyy/blynk-library-python) (by Volodymyr Shymanskyy)
 * [Particle](https://github.com/vshymanskyy/blynk-library-spark)
 * [Lua, OpenWrt, NodeMCU](https://github.com/vshymanskyy/blynk-library-lua)
 * [OpenWrt packages](https://github.com/vshymanskyy/blynk-library-openwrt)
