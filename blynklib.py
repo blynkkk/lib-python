@@ -40,6 +40,11 @@ def stub_log(*args):
 class BlynkError(Exception):
     pass
 
+class RedirectError(Exception):
+    def __init__(self, server, port):
+        self.server = server
+        self.port = port
+
 
 class Protocol(object):
     MSG_RSP = const(0)
@@ -53,9 +58,11 @@ class Protocol(object):
     MSG_INTERNAL = const(17)
     MSG_PROPERTY = const(19)
     MSG_HW = const(20)
+    MSG_REDIRECT = const(41)
     MSG_HEAD_LEN = const(5)
 
     STATUS_INVALID_TOKEN = const(9)
+    STATUS_NO_DATA = const(17)
     STATUS_OK = const(200)
     VPIN_MAX_NUM = const(32)
 
@@ -83,7 +90,7 @@ class Protocol(object):
             raise BlynkError('Command too long. Length = {}'.format(h_data))
         elif msg_type in (self.MSG_RSP, self.MSG_PING, self.MSG_INTERNAL):
             pass
-        elif msg_type in (self.MSG_HW, self.MSG_BRIDGE):
+        elif msg_type in (self.MSG_HW, self.MSG_BRIDGE, self.MSG_REDIRECT):
             msg_body = rsp_data[self.MSG_HEAD_LEN: self.MSG_HEAD_LEN + h_data]
             msg_args = [itm.decode('utf-8') for itm in msg_body.split(b'\0')]
         else:
@@ -214,10 +221,12 @@ class Connection(Protocol):
         rsp_data = self.receive(self.rcv_buffer, self.SOCK_MAX_TIMEOUT)
         if not rsp_data:
             raise BlynkError('Auth stage timeout')
-        _, _, status, _ = self.parse_response(rsp_data, self.rcv_buffer)
+        _, _, status, args = self.parse_response(rsp_data, self.rcv_buffer)
         if status != self.STATUS_OK:
             if status == self.STATUS_INVALID_TOKEN:
                 raise BlynkError('Invalid Auth Token')
+            if status == self.STATUS_NO_DATA:
+                raise RedirectError(*args)
             raise BlynkError('Auth stage failed. Status={}'.format(status))
         self._state = self.AUTHENTICATED
         self.log('Access granted')
@@ -247,6 +256,8 @@ class Blynk(Connection):
     _VPIN_READ_ALL = '{}{}'.format(_VPIN_READ, _VPIN_WILDCARD)
     _VPIN_WRITE_ALL = '{}{}'.format(_VPIN_WRITE, _VPIN_WILDCARD)
     _events = {}
+    _token = None
+    _connection_args = None
 
     def __init__(self, token, **kwargs):
         Connection.__init__(self, token, **kwargs)
@@ -255,6 +266,8 @@ class Blynk(Connection):
         self._last_send_time = ticks_ms()
         self._last_ping_time = ticks_ms()
         self._state = self.DISCONNECTED
+        self._token = token
+        self._connection_args = kwargs
         print(LOGO)
 
     def connect(self, timeout=_CONNECT_TIMEOUT):
@@ -271,6 +284,12 @@ class Blynk(Connection):
                 except BlynkError as b_err:
                     self.disconnect(b_err)
                     sleep_ms(self.TASK_PERIOD_RES)
+                except RedirectError as r_err:
+                    self.disconnect()
+                    sleep_ms(self.TASK_PERIOD_RES)
+                    self._connection_args['server'] = r_err.server
+                    self._connection_args['port'] = r_err.port
+                    Connection.__init__(self, self._token, **self._connection_args)
             if time.time() >= end_time:
                 return False
 
