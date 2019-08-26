@@ -256,8 +256,6 @@ class Blynk(Connection):
     _VPIN_READ_ALL = '{}{}'.format(_VPIN_READ, _VPIN_WILDCARD)
     _VPIN_WRITE_ALL = '{}{}'.format(_VPIN_WRITE, _VPIN_WILDCARD)
     _events = {}
-    _token = None
-    _connection_args = None
 
     def __init__(self, token, **kwargs):
         Connection.__init__(self, token, **kwargs)
@@ -266,8 +264,6 @@ class Blynk(Connection):
         self._last_send_time = ticks_ms()
         self._last_ping_time = ticks_ms()
         self._state = self.DISCONNECTED
-        self._token = token
-        self._connection_args = kwargs
         print(LOGO)
 
     def connect(self, timeout=_CONNECT_TIMEOUT):
@@ -286,10 +282,9 @@ class Blynk(Connection):
                     sleep_ms(self.TASK_PERIOD_RES)
                 except RedirectError as r_err:
                     self.disconnect()
+                    self.server = r_err.server
+                    self.port = r_err.port
                     sleep_ms(self.TASK_PERIOD_RES)
-                    self._connection_args['server'] = r_err.server
-                    self._connection_args['port'] = r_err.port
-                    Connection.__init__(self, self._token, **self._connection_args)
             if time.time() >= end_time:
                 return False
 
