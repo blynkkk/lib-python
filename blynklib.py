@@ -221,11 +221,11 @@ class Connection(Protocol):
         rsp_data = self.receive(self.rcv_buffer, self.SOCK_MAX_TIMEOUT)
         if not rsp_data:
             raise BlynkError('Auth stage timeout')
-        _, _, status, args = self.parse_response(rsp_data, self.rcv_buffer)
+        msg_type, _, status, args = self.parse_response(rsp_data, self.rcv_buffer)
         if status != self.STATUS_OK:
             if status == self.STATUS_INVALID_TOKEN:
                 raise BlynkError('Invalid Auth Token')
-            if status == self.STATUS_NO_DATA:
+            if msg_type == self.MSG_REDIRECT:
                 raise RedirectError(*args)
             raise BlynkError('Auth stage failed. Status={}'.format(status))
         self._state = self.AUTHENTICATED
