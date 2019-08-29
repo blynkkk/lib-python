@@ -99,7 +99,7 @@ class TestBlynkProtocol:
 
     def test_heartbeat_msg(self, pb):
         result = pb.heartbeat_msg(20, 2048)
-        assert result == b'\x11\x00\x02\x00+ver\x000.2.4\x00buff-in\x002048\x00h-beat\x0020\x00dev\x00python'
+        assert result == b'\x11\x00\x02\x00+ver\x000.2.5\x00buff-in\x002048\x00h-beat\x0020\x00dev\x00python'
 
     def test_login_msg(self, pb):
         result = pb.login_msg('1234')

@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='blynklib',
-    version='0.2.4',
+    version='0.2.5',
     description='Blynk Python/Micropython library',
     long_description=long_description,
     long_description_content_type="text/markdown",

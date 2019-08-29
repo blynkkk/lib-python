@@ -2,7 +2,7 @@
 # Copyright (c) 2015-2019 Volodymyr Shymanskyy.
 # See the file LICENSE for copying permission.
 
-__version__ = '0.2.4'
+__version__ = '0.2.5'
 
 try:
     import usocket as socket
@@ -39,6 +39,7 @@ def stub_log(*args):
 
 class BlynkError(Exception):
     pass
+
 
 class RedirectError(Exception):
     def __init__(self, server, port):

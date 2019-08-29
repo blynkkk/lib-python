@@ -2,7 +2,7 @@
 from __future__ import print_function
 import socket
 import pytest
-from blynklib import Blynk, BlynkError
+from blynklib import Blynk, BlynkError, RedirectError
 
 
 class TestBlynk:
@@ -30,6 +30,19 @@ class TestBlynk:
                             result = bl.connect(0.001)
                             assert result is False
                             assert bl.disconnect.call_count > 1
+
+    def test_connect_redirect_exception(self, bl, mocker):
+        with mocker.patch.object(bl, 'connected', return_value=False):
+            with mocker.patch.object(bl, '_get_socket', return_value=None):
+                with mocker.patch.object(bl, '_authenticate', side_effect=RedirectError('127.0.0.1', 4444)):
+                    with mocker.patch.object(bl, 'disconnect', return_value=None):
+                        with mocker.patch('time.sleep', return_value=None):
+                            mocker.spy(bl, 'disconnect')
+                            result = bl.connect(0.001)
+                            assert result is False
+                            assert bl.disconnect.call_count > 1
+                            assert bl.server == '127.0.0.1'
+                            assert bl.port == 4444
 
     def test_connect_timeout(self, bl, mocker):
         bl._state = bl.CONNECTING
