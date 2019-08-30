@@ -160,7 +160,8 @@ Examples can be found **[here][blynk-py-examples]** Check them all to get famili
 - [06_terminal_widget.py](https://github.com/blynkkk/lib-python/blob/master/examples/06_terminal_widget.py): Communication between hardware and app through Terminal widget)
 - [07_tweet_and_logging.py](https://github.com/blynkkk/lib-python/blob/master/examples/07_tweet_and_logging.py): How to post to Twitter and log events from your hardware
 - [08_blynk_timer.py](https://github.com/blynkkk/lib-python/blob/master/examples/08_blynk_timer.py): How send data periodically from hardware by using **[Blynk Timer][blynktimer-doc]**
-- [09_sync_virtual_pin.py](https://github.com/blynkkk/lib-python/blob/master/examples/09_sync_virtual_pin.py): How to sync virtual pin states and properties  
+- [09_sync_virtual_pin.py](https://github.com/blynkkk/lib-python/blob/master/examples/09_sync_virtual_pin.py): How to sync virtual pin states and properties
+- [10_rtc_sync.py](https://github.com/blynkkk/lib-python/blob/master/examples/10_rtc_sync.py): How to perform RTC sync with blynk server 
 
 ##### Raspberry Pi (any):
 Read [Raspberry Pi guide](https://github.com/blynkkk/lib-python/tree/master/examples/raspberry) first.

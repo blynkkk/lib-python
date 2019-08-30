@@ -89,9 +89,9 @@ class Protocol(object):
             raise BlynkError('invalid msg_id == 0')
         elif h_data >= msg_buffer:
             raise BlynkError('Command too long. Length = {}'.format(h_data))
-        elif msg_type in (self.MSG_RSP, self.MSG_PING, self.MSG_INTERNAL):
+        elif msg_type in (self.MSG_RSP, self.MSG_PING):
             pass
-        elif msg_type in (self.MSG_HW, self.MSG_BRIDGE, self.MSG_REDIRECT):
+        elif msg_type in (self.MSG_HW, self.MSG_BRIDGE, self.MSG_INTERNAL, self.MSG_REDIRECT):
             msg_body = rsp_data[self.MSG_HEAD_LEN: self.MSG_HEAD_LEN + h_data]
             msg_args = [itm.decode('utf-8') for itm in msg_body.split(b'\0')]
         else:
@@ -128,6 +128,9 @@ class Protocol(object):
 
     def set_property_msg(self, pin, prop, *val):
         return self._pack_msg(self.MSG_PROPERTY, pin, prop, *val)
+
+    def internal_msg(self, *args):
+        return self._pack_msg(self.MSG_INTERNAL, *args)
 
 
 class Connection(Protocol):
@@ -316,6 +319,9 @@ class Blynk(Connection):
     def set_property(self, v_pin, property_name, *val):
         return self.send(self.set_property_msg(v_pin, property_name, *val))
 
+    def internal(self, *args):
+        return self.send(self.internal_msg(*args))
+
     def handle_event(blynk, event_name):
         class Deco(object):
             def __init__(self, func):
@@ -344,8 +350,8 @@ class Blynk(Connection):
         elif msg_type == self.MSG_PING:
             self.send(self.response_msg(self.STATUS_OK, msg_id=msg_id))
         elif msg_type in (self.MSG_HW, self.MSG_BRIDGE, self.MSG_INTERNAL):
-            if msg_type == self.MSG_INTERNAL and len(msg_args) >= const(3):
-                self.call_handler("{}{}".format(self._INTERNAL, msg_args[1]), msg_args[2:])
+            if msg_type == self.MSG_INTERNAL and len(msg_args) >= const(2):
+                self.call_handler("{}{}".format(self._INTERNAL, msg_args[0]), msg_args[1:])
             elif len(msg_args) >= const(3) and msg_args[0] == 'vw':
                 self.call_handler("{}{}".format(self._VPIN_WRITE, msg_args[1]), int(msg_args[1]), msg_args[2:])
             elif len(msg_args) == const(2) and msg_args[0] == 'vr':

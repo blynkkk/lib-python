@@ -136,3 +136,7 @@ class TestBlynkProtocol:
     def test_set_property_msg(self, pb):
         result = pb.set_property_msg(10, 'color', '#FF00EE')
         assert result == b'\x13\x00\x02\x00\x1010\x00color\x00#FF00EE'
+
+    def test_internal_msg(self, pb):
+        result = pb.internal_msg('rtc', 'sync')
+        assert result == b'\x11\x00\x02\x00\x08rtc\x00sync'

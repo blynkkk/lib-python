@@ -85,6 +85,11 @@ class TestBlynk:
             result = bl.set_property(1, '2', '3')
             assert result == 60
 
+    def test_internal(self, bl, mocker):
+        with mocker.patch.object(bl, 'send', return_value=70):
+            result = bl.internal('rtc', 'sync')
+            assert result == 70
+
     def test_hadle_event(self, bl):
         bl._events = {}
 
@@ -143,13 +148,13 @@ class TestBlynk:
     def test_process_internal(self, bl, mocker):
         bl._events = {}
 
-        @bl.handle_event('internal_5')
+        @bl.handle_event('internal_xyz')
         def internal_handler(*args):
-            bl._status = 'INTERNAL TEST{}'.format(*args)
+            bl._status = 'INTERNAL TEST {}'.format(*args)
 
         with mocker.patch.object(bl, 'send', return_value=None):
-            bl.process(bl.MSG_INTERNAL, 100, 200, ['int', 5, 1, 2])
-            assert bl._status == 'INTERNAL TEST[1, 2]'
+            bl.process(bl.MSG_INTERNAL, 100, 20, ["xyz", "add", 2])
+            assert bl._status == "INTERNAL TEST ['add', 2]"
 
     def test_process_write(self, bl, mocker):
         bl._events = {}
