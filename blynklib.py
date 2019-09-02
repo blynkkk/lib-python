@@ -248,7 +248,6 @@ class Connection(Protocol):
         self._last_rcv_time = ticks_ms()
         self._last_ping_time = 0
 
-
     def connected(self):
         return True if self._state == self.AUTHENTICATED else False
 
