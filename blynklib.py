@@ -237,6 +237,7 @@ class Connection(Protocol):
 
     def _set_heartbeat(self):
         self.send(self.heartbeat_msg(self.heartbeat, self.rcv_buffer))
+        self._last_send_time = ticks_ms()
         rcv_data = self.receive(self.rcv_buffer, self.SOCK_MAX_TIMEOUT)
         if not rcv_data:
             raise BlynkError('Heartbeat stage timeout')
@@ -244,6 +245,9 @@ class Connection(Protocol):
         if status != self.STATUS_OK:
             raise BlynkError('Set heartbeat returned code={}'.format(status))
         self.log('Heartbeat = {} sec. MaxCmdBuffer = {} bytes'.format(self.heartbeat, self.rcv_buffer))
+        self._last_rcv_time = ticks_ms()
+        self._last_ping_time = 0
+
 
     def connected(self):
         return True if self._state == self.AUTHENTICATED else False
