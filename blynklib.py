@@ -278,6 +278,7 @@ class Blynk(Connection):
                     self._get_socket()
                     self._authenticate()
                     self._set_heartbeat()
+                    self._last_rcv_time = ticks_ms()
                     self.log('Registered events: {}\n'.format(list(self._events.keys())))
                     self.call_handler(self._CONNECT)
                     return True
@@ -361,8 +362,8 @@ class Blynk(Connection):
         end_time = time.time() + timeout
         while time.time() <= end_time:
             rsp_data = self.receive(self.rcv_buffer, self.SOCK_TIMEOUT)
-            self._last_rcv_time = ticks_ms()
             if rsp_data:
+                self._last_rcv_time = ticks_ms()
                 msg_type, msg_id, h_data, msg_args = self.parse_response(rsp_data, self.rcv_buffer)
                 self.process(msg_type, msg_id, h_data, msg_args)
 

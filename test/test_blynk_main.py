@@ -2,13 +2,13 @@
 from __future__ import print_function
 import socket
 import pytest
-from blynklib import Blynk, BlynkError, RedirectError
+import blynklib
 
 
 class TestBlynk:
     @pytest.fixture
     def bl(self):
-        blynk = Blynk('1234', log=print)
+        blynk = blynklib.Blynk('1234', log=print)
         yield blynk
 
     def test_connect(self, bl, mocker):
@@ -17,13 +17,15 @@ class TestBlynk:
                 with mocker.patch.object(bl, '_authenticate', return_value=None):
                     with mocker.patch.object(bl, '_set_heartbeat', return_value=None):
                         with mocker.patch.object(bl, 'call_handler', return_value=None):
-                            result = bl.connect()
-                            assert result is True
+                            with mocker.patch.object(blynklib, 'ticks_ms', return_value=42):
+                                result = bl.connect()
+                                assert result is True
+                                assert bl._last_rcv_time == 42
 
     def test_connect_exception(self, bl, mocker):
         with mocker.patch.object(bl, 'connected', return_value=False):
             with mocker.patch.object(bl, '_get_socket', return_value=None):
-                with mocker.patch.object(bl, '_authenticate', side_effect=BlynkError()):
+                with mocker.patch.object(bl, '_authenticate', side_effect=blynklib.BlynkError()):
                     with mocker.patch.object(bl, 'disconnect', return_value=None):
                         with mocker.patch('time.sleep', return_value=None):
                             mocker.spy(bl, 'disconnect')
@@ -34,7 +36,7 @@ class TestBlynk:
     def test_connect_redirect_exception(self, bl, mocker):
         with mocker.patch.object(bl, 'connected', return_value=False):
             with mocker.patch.object(bl, '_get_socket', return_value=None):
-                with mocker.patch.object(bl, '_authenticate', side_effect=RedirectError('127.0.0.1', 4444)):
+                with mocker.patch.object(bl, '_authenticate', side_effect=blynklib.RedirectError('127.0.0.1', 4444)):
                     with mocker.patch.object(bl, 'disconnect', return_value=None):
                         with mocker.patch('time.sleep', return_value=None):
                             mocker.spy(bl, 'disconnect')
