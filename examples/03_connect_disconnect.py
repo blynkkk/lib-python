@@ -71,7 +71,7 @@ def connect_handler():
 
 
 @blynk.handle_event("disconnect")
-def connect_handler():
+def disconnect_handler():
     print(DISCONNECT_PRINT_MSG)
     print('Sleeping 4 sec in disconnect handler...')
     time.sleep(4)
