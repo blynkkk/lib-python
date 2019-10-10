@@ -67,7 +67,7 @@ class Protocol(object):
     STATUS_OK = const(200)
     VPIN_MAX_NUM = const(32)
 
-    _msg_id = 1
+    _msg_id = 0
 
     def _get_msg_id(self, **kwargs):
         if 'msg_id' in kwargs:
@@ -153,13 +153,14 @@ class Connection(Protocol):
     _last_ping_time = 0
     _last_send_time = 0
 
-    def __init__(self, token, server='blynk-cloud.com', port=80, heartbeat=10, rcv_buffer=1024, log=stub_log):
+    def __init__(self, token, server='blynk-cloud.com', port=80, ssl=False, heartbeat=10, rcv_buffer=1024, log=stub_log):
         self.token = token
         self.server = server
         self.port = port
         self.heartbeat = heartbeat
         self.rcv_buffer = rcv_buffer
         self.log = log
+        self.ssl = ssl
 
     def _set_socket_timeout(self, timeout):
         if getattr(self._socket, 'settimeout', None):
@@ -188,7 +189,7 @@ class Connection(Protocol):
                 d_buff = d_buff[:length]
             return d_buff
         except (IOError, OSError) as err:
-            if str(err) == 'timed out':
+            if str(err) == 'timed out' or str(err) == 'The read operation timed out':
                 return b''
             if str(self.EAGAIN) in str(err) or str(self.ETIMEDOUT) in str(err):
                 return b''
@@ -211,9 +212,16 @@ class Connection(Protocol):
     def _get_socket(self):
         try:
             self._state = self.CONNECTING
-            self._socket = socket.socket()
-            self._socket.connect(socket.getaddrinfo(self.server, self.port)[0][4])
-            self._set_socket_timeout(self.SOCK_TIMEOUT)
+            self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self._socket.connect((self.server, self.port))
+            if (self.ssl):
+                self.log('Using SSL socket...')
+                import ssl, os
+                sslContext = ssl.create_default_context()
+                sslContext.verify_mode = ssl.CERT_REQUIRED
+                caFile = os.path.dirname(__file__) + "/_blynk-cloudcom.crt"
+                sslContext.load_verify_locations(cafile=caFile)
+                self._socket = sslContext.wrap_socket(sock=self._socket, server_hostname=self.server)
             self.log('Connected to blynk server')
         except Exception as g_exc:
             raise BlynkError('Connection with the Blynk server failed: {}'.format(g_exc))

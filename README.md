@@ -115,7 +115,10 @@ blynk = blynklib.Blynk(BLYNK_AUTH)
  
 # advanced options of lib init
 # from __future__ import print_function
-# blynk = blynklib.Blynk(BLYNK_AUTH, server='blynk-cloud.com', port=80, heartbeat=10, rcv_buffer=1024, log=print)
+# blynk = blynklib.Blynk(BLYNK_AUTH, server='blynk-cloud.com', port=80, ssl=False, heartbeat=10, rcv_buffer=1024, log=print)
+
+# Lib init with hardware SSL connection example
+# blynk = blynklib.Blynk(BLYNK_AUTH, port=443, ssl=True)
 
 # register handler for Virtual Pin V22 reading by Blynk App.
 # when a widget in Blynk App asks Virtual Pin data from server within given configurable interval (1,2,5,10 sec etc) 
