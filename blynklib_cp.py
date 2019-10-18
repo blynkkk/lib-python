@@ -127,6 +127,7 @@ class Protocol(object):
 class Connection(Protocol):
     SOCK_MAX_TIMEOUT = 5
     SOCK_TIMEOUT = 0.05
+    SOCK_SSL_TIMEOUT = 1
     EAGAIN = 11
     ETIMEDOUT = 60
     RETRIES_TX_DELAY = 2
@@ -144,13 +145,14 @@ class Connection(Protocol):
     _last_ping_time = 0
     _last_send_time = 0
 
-    def __init__(self, token, server='blynk-cloud.com', port=80, heartbeat=10, rcv_buffer=1024, log=stub_log):
+    def __init__(self, token, server='blynk-cloud.com', port=80, ssl_cert=None, heartbeat=10, rcv_buffer=1024, log=stub_log):
         self.token = token
         self.server = server
         self.port = port
         self.heartbeat = heartbeat
         self.rcv_buffer = rcv_buffer
         self.log = log
+        self.ssl_cert = ssl_cert
 
     def send(self, data):
         retries = self.RETRIES_TX_MAX_NUM
@@ -196,7 +198,20 @@ class Connection(Protocol):
             self._state = self.CONNECTING
             self._socket = socket.socket()
             self._socket.connect(socket.getaddrinfo(self.server, self.port)[0][4])
-            self._socket.settimeout(self.SOCK_TIMEOUT)
+            if (self.ssl_cert is not None):
+                self.log('Using SSL socket...')
+                import ssl, os
+                sslContext = ssl.create_default_context()
+                sslContext.verify_mode = ssl.CERT_REQUIRED
+                if (self.ssl_cert == "default"):
+                    caFile = os.path.dirname(__file__) + "/certificate/_blynk-cloudcom.crt"
+                else:
+                    caFile = self.ssl_cert
+                sslContext.load_verify_locations(cafile=caFile)
+                self._socket.settimeout(self.SOCK_SSL_TIMEOUT)
+                self._socket = sslContext.wrap_socket(sock=self._socket, server_hostname=self.server)
+            else:
+                self._socket.settimeout(self.SOCK_TIMEOUT)
             self.log('Connected to blynk server')
         except Exception as g_exc:
             raise BlynkError('Connection with the Blynk server failed: {}'.format(g_exc))
