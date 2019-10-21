@@ -60,7 +60,7 @@ pip install --user -e .
 ``` 
 
 #### Testing
-You can run unit tests for cPython version of library (blynklib_cp.py) systems using the command:
+You can run unit tests for cPython version of library (blynklib_cp.py) using the command:
 
     python setup.py test
 
@@ -80,7 +80,7 @@ This library supports Python2, Python3, and Micropython.
 - Tested to work with: Raspberry Pi (any), ESP32, ESP8266
 
 ##### List of available operations:
- - Subscribe to connect/disconnect events 
+ - Subscribe to connect/disconnect events (ssl connection available only for cPython lib)
  - Subscribe to read/write events of [virtual pins][blynk-vpins]
  - [Virtual Pin][blynk-vpins] write
  - [Virtual Pin][blynk-vpins] sync
@@ -115,7 +115,8 @@ blynk = blynklib.Blynk(BLYNK_AUTH)
  
 # advanced options of lib init
 # from __future__ import print_function
-# blynk = blynklib.Blynk(BLYNK_AUTH, server='blynk-cloud.com', port=80, ssl_cert=None, heartbeat=10, rcv_buffer=1024, log=print)
+# blynk = blynklib.Blynk(BLYNK_AUTH, server='blynk-cloud.com', port=80, ssl_cert=None,
+#                        heartbeat=10, rcv_buffer=1024, log=print)
 
 # Lib init with SSL socket connection
 # blynk = blynklib.Blynk(BLYNK_AUTH, port=443, ssl_cert='<path to local blynk server certificate>')
@@ -167,7 +168,7 @@ Examples can be found **[here][blynk-py-examples]** Check them all to get famili
 - [08_blynk_timer.py](https://github.com/blynkkk/lib-python/blob/master/examples/08_blynk_timer.py): How send data periodically from hardware by using **[Blynk Timer][blynktimer-doc]**
 - [09_sync_virtual_pin.py](https://github.com/blynkkk/lib-python/blob/master/examples/09_sync_virtual_pin.py): How to sync virtual pin states and properties
 - [10_rtc_sync.py](https://github.com/blynkkk/lib-python/blob/master/examples/10_rtc_sync.py): How to perform RTC sync with blynk server 
-- [11_ssl_socket.py](https://github.com/blynkkk/lib-python/blob/master/examples/10_ssl_socket.py): SSL server connection. Feature available only fo cPython. 
+- [11_ssl_socket.py](https://github.com/blynkkk/lib-python/blob/master/examples/11_ssl_socket.py): SSL server connection. Feature available only fo cPython. 
 
 ##### Raspberry Pi (any):
 Read [Raspberry Pi guide](https://github.com/blynkkk/lib-python/tree/master/examples/raspberry) first.
