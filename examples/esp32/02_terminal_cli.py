@@ -33,7 +33,7 @@ Additional info about blynk you can find by examining such resources:
                                     http://twitter.com/blynk_app
 =====================================================================================================================
 """
-import blynklib
+import blynklib_mp as blynklib
 import network
 import uos
 import utime as time

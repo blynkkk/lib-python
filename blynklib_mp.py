@@ -4,10 +4,16 @@
 
 __version__ = '0.2.6'
 
-import socket
-import ssl
-import struct
-import time
+import usocket as socket
+import utime as time
+import ustruct as struct
+import uselect as select
+from micropython import const
+
+ticks_ms = time.ticks_ms
+sleep_ms = time.sleep_ms
+
+IOError = OSError
 
 LOGO = """
         ___  __          __
@@ -21,14 +27,6 @@ def stub_log(*args):
     pass
 
 
-def ticks_ms():
-    return int(time.time() * 1000)
-
-
-def sleep_ms(ms):
-    time.sleep(ms // 1000)
-
-
 class BlynkError(Exception):
     pass
 
@@ -40,32 +38,31 @@ class RedirectError(Exception):
 
 
 class Protocol(object):
-    MSG_RSP = 0
-    MSG_LOGIN = 2
-    MSG_PING = 6
-    MSG_TWEET = 12
-    MSG_EMAIL = 13
-    MSG_NOTIFY = 14
-    MSG_BRIDGE = 15
-    MSG_HW_SYNC = 16
-    MSG_INTERNAL = 17
-    MSG_PROPERTY = 19
-    MSG_HW = 20
-    MSG_REDIRECT = 41
-    MSG_HEAD_LEN = 5
+    MSG_RSP = const(0)
+    MSG_LOGIN = const(2)
+    MSG_PING = const(6)
+    MSG_TWEET = const(12)
+    MSG_EMAIL = const(13)
+    MSG_NOTIFY = const(14)
+    MSG_BRIDGE = const(15)
+    MSG_HW_SYNC = const(16)
+    MSG_INTERNAL = const(17)
+    MSG_PROPERTY = const(19)
+    MSG_HW = const(20)
+    MSG_REDIRECT = const(41)
+    MSG_HEAD_LEN = const(5)
 
-    STATUS_INVALID_TOKEN = 9
-    STATUS_NO_DATA = 17
-    STATUS_OK = 200
-    VPIN_MAX_NUM = 32
+    STATUS_INVALID_TOKEN = const(9)
+    STATUS_OK = const(200)
+    VPIN_MAX_NUM = const(32)
 
-    _msg_id = 0
+    _msg_id = 1
 
     def _get_msg_id(self, **kwargs):
         if 'msg_id' in kwargs:
             return kwargs['msg_id']
-        self._msg_id += 1
-        return self._msg_id if self._msg_id <= 0xFFFF else 0
+        self._msg_id += const(1)
+        return self._msg_id if self._msg_id <= const(0xFFFF) else const(1)
 
     def _pack_msg(self, msg_type, *args, **kwargs):
         data = ('\0'.join([str(curr_arg) for curr_arg in args])).encode('utf-8')
@@ -92,7 +89,7 @@ class Protocol(object):
 
     def heartbeat_msg(self, heartbeat, rcv_buffer):
         return self._pack_msg(self.MSG_INTERNAL, 'ver', __version__, 'buff-in', rcv_buffer, 'h-beat', heartbeat,
-                              'dev', 'python')
+                              'dev', 'mpython')
 
     def login_msg(self, token):
         return self._pack_msg(self.MSG_LOGIN, token)
@@ -126,19 +123,18 @@ class Protocol(object):
 
 
 class Connection(Protocol):
-    SOCK_MAX_TIMEOUT = 5
+    SOCK_MAX_TIMEOUT = const(5)
     SOCK_TIMEOUT = 0.05
-    SOCK_SSL_TIMEOUT = 1
-    EAGAIN = 11
-    ETIMEDOUT = 60
-    RETRIES_TX_DELAY = 2
-    RETRIES_TX_MAX_NUM = 3
-    RECONNECT_SLEEP = 1
-    TASK_PERIOD_RES = 50
-    DISCONNECTED = 0
-    CONNECTING = 1
-    AUTHENTICATING = 2
-    AUTHENTICATED = 3
+    EAGAIN = const(11)
+    ETIMEDOUT = const(60)
+    RETRIES_TX_DELAY = const(2)
+    RETRIES_TX_MAX_NUM = const(3)
+    RECONNECT_SLEEP = const(1)
+    TASK_PERIOD_RES = const(50)
+    DISCONNECTED = const(0)
+    CONNECTING = const(1)
+    AUTHENTICATING = const(2)
+    AUTHENTICATED = const(3)
 
     _state = None
     _socket = None
@@ -146,15 +142,18 @@ class Connection(Protocol):
     _last_ping_time = 0
     _last_send_time = 0
 
-    def __init__(self, token, server='blynk-cloud.com', port=80, ssl_cert=None, heartbeat=10, rcv_buffer=1024,
-                 log=stub_log):
+    def __init__(self, token, server='blynk-cloud.com', port=80, heartbeat=10, rcv_buffer=1024, log=stub_log):
         self.token = token
         self.server = server
         self.port = port
         self.heartbeat = heartbeat
         self.rcv_buffer = rcv_buffer
         self.log = log
-        self.ssl_cert = ssl_cert
+
+    def _set_socket_timeout(self, timeout):
+        p = select.poll()
+        p.register(self._socket)
+        p.poll(int(timeout * const(1000)))
 
     def send(self, data):
         retries = self.RETRIES_TX_MAX_NUM
@@ -169,13 +168,13 @@ class Connection(Protocol):
     def receive(self, length, timeout):
         d_buff = b''
         try:
-            self._socket.settimeout(timeout)
+            self._set_socket_timeout(timeout)
             d_buff += self._socket.recv(length)
             if len(d_buff) >= length:
                 d_buff = d_buff[:length]
             return d_buff
         except (IOError, OSError) as err:
-            if 'timed out' in str(err):
+            if str(err) == 'timed out':
                 return b''
             if str(self.EAGAIN) in str(err) or str(self.ETIMEDOUT) in str(err):
                 return b''
@@ -183,13 +182,13 @@ class Connection(Protocol):
 
     def is_server_alive(self):
         now = ticks_ms()
-        h_beat_ms = self.heartbeat * 1000
+        h_beat_ms = self.heartbeat * const(1000)
         rcv_delta = now - self._last_rcv_time
         ping_delta = now - self._last_ping_time
         send_delta = now - self._last_send_time
-        if rcv_delta > h_beat_ms + (h_beat_ms // 2):
+        if rcv_delta > h_beat_ms + (h_beat_ms // const(2)):
             return False
-        if (ping_delta > h_beat_ms // 10) and (send_delta > h_beat_ms or rcv_delta > h_beat_ms):
+        if (ping_delta > h_beat_ms // const(10)) and (send_delta > h_beat_ms or rcv_delta > h_beat_ms):
             self.send(self.ping_msg())
             self.log('Heartbeat time: {}'.format(now))
             self._last_ping_time = now
@@ -199,20 +198,11 @@ class Connection(Protocol):
         try:
             self._state = self.CONNECTING
             self._socket = socket.socket()
-            self._socket.connect(socket.getaddrinfo(self.server, self.port)[0][4])
-            self._socket.settimeout(self.SOCK_TIMEOUT)
-            if self.ssl_cert:
-                # system’s default CA certificates case
-                if self.ssl_cert == "default":
-                    self.ssl_cert = None
-                self.log('Using SSL socket...')
-                ssl_context = ssl.create_default_context(cafile=self.ssl_cert)
-                ssl_context.verify_mode = ssl.CERT_REQUIRED
-                self._socket.settimeout(self.SOCK_SSL_TIMEOUT)
-                self._socket = ssl_context.wrap_socket(sock=self._socket, server_hostname=self.server)
-            self.log('Connected to blynk server')
+            self._socket.connect(socket.getaddrinfo(self.server, self.port)[0][-1])
+            self._set_socket_timeout(self.SOCK_TIMEOUT)
+            self.log('Connected to server')
         except Exception as g_exc:
-            raise BlynkError('Connection with the Blynk server failed: {}'.format(g_exc))
+            raise BlynkError('Server connection failed: {}'.format(g_exc))
 
     def _authenticate(self):
         self.log('Authenticating device...')
@@ -246,7 +236,7 @@ class Connection(Protocol):
 
 
 class Blynk(Connection):
-    _CONNECT_TIMEOUT = 30  # 30sec
+    _CONNECT_TIMEOUT = const(30)  # 30sec
     _VPIN_WILDCARD = '*'
     _VPIN_READ = 'read v'
     _VPIN_WRITE = 'write v'
@@ -296,7 +286,6 @@ class Blynk(Connection):
         self._state = self.DISCONNECTED
         if err_msg:
             self.log('[ERROR]: {}\nConnection closed'.format(err_msg))
-        self._msg_id = 0
         time.sleep(self.RECONNECT_SLEEP)
 
     def virtual_write(self, v_pin, *val):
@@ -348,11 +337,11 @@ class Blynk(Connection):
         elif msg_type == self.MSG_PING:
             self.send(self.response_msg(self.STATUS_OK, msg_id=msg_id))
         elif msg_type in (self.MSG_HW, self.MSG_BRIDGE, self.MSG_INTERNAL):
-            if msg_type == self.MSG_INTERNAL and len(msg_args) >= 2:
+            if msg_type == self.MSG_INTERNAL and len(msg_args) >= const(2):
                 self.call_handler("{}{}".format(self._INTERNAL, msg_args[0]), msg_args[1:])
-            elif len(msg_args) >= 3 and msg_args[0] == 'vw':
+            elif len(msg_args) >= const(3) and msg_args[0] == 'vw':
                 self.call_handler("{}{}".format(self._VPIN_WRITE, msg_args[1]), int(msg_args[1]), msg_args[2:])
-            elif len(msg_args) == 2 and msg_args[0] == 'vr':
+            elif len(msg_args) == const(2) and msg_args[0] == 'vr':
                 self.call_handler("{}{}".format(self._VPIN_READ, msg_args[1]), int(msg_args[1]))
 
     def read_response(self, timeout=0.5):
@@ -371,7 +360,7 @@ class Blynk(Connection):
             try:
                 self.read_response(timeout=self.SOCK_TIMEOUT)
                 if not self.is_server_alive():
-                    self.disconnect('Blynk server is offline')
+                    self.disconnect('Server is offline')
             except KeyboardInterrupt:
                 raise
             except BlynkError as b_err:

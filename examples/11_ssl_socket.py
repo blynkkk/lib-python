@@ -1,8 +1,8 @@
 """
 [SSL CONNECT/DISCONNECT EVENTS EXAMPLE] =================================================================
 NOTE!
-    This example works correctly only fo cPython version of library (blynklib_cp.py)
-    For micropython present limitation that keyword arguments of wrap_socket may be not supported
+    This example works correctly only fo cPython version of library (blynklib.py)
+    For micropython present limitation that keyword arguments of wrap_socket may be not supported by certain ports
 
 
 Environment prepare:
@@ -55,7 +55,7 @@ Additional info about blynk you can find by examining such resources:
 =====================================================================================================
 """
 
-import blynklib_cp as blynklib
+import blynklib
 import time
 import logging
 

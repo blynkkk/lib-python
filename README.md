@@ -60,7 +60,7 @@ pip install --user -e .
 ``` 
 
 #### Testing
-You can run unit tests for cPython version of library (blynklib_cp.py) using the command:
+You can run unit tests for cPython version of library (blynklib.py) using the command:
 
     python setup.py test
 
@@ -73,14 +73,14 @@ and related installation docs can be found [here][micropython-pkg].
 
 
 ## Features
-This library supports Python2, Python3, and Micropython.
+This library supports Python2, Python3 (blynklib.py) , and Micropython (blynklib_mp.py).
 
 - Communication with public or local [Blynk Server][blynk-server].
 - Exchange any data between your hardware and app
 - Tested to work with: Raspberry Pi (any), ESP32, ESP8266
 
 ##### List of available operations:
- - Subscribe to connect/disconnect events (ssl connection available only for cPython lib)
+ - Subscribe to connect/disconnect events (ssl connection supported only by cPython lib)
  - Subscribe to read/write events of [virtual pins][blynk-vpins]
  - [Virtual Pin][blynk-vpins] write
  - [Virtual Pin][blynk-vpins] sync
@@ -108,6 +108,7 @@ BLYNK_AUTH = '<YourAuthToken>' #insert your Auth Token here
 #### Usage example
 ```python
 import blynklib
+# import blynklib_mp as blynklib # micropython import
 
 BLYNK_AUTH = '<YourAuthToken>' #insert your Auth Token here
 # base lib init
@@ -122,6 +123,7 @@ blynk = blynklib.Blynk(BLYNK_AUTH)
 # blynk = blynklib.Blynk(BLYNK_AUTH, port=443, ssl_cert='<path to local blynk server certificate>')
 # current blynk-cloud.com certificate stored in project as 
 # https://github.com/blynkkk/lib-python/blob/master/certificate/blynk-cloud.com.crt
+# Note! ssl feature supported only by cPython
 
 # register handler for Virtual Pin V22 reading by Blynk App.
 # when a widget in Blynk App asks Virtual Pin data from server within given configurable interval (1,2,5,10 sec etc) 
@@ -168,7 +170,7 @@ Examples can be found **[here][blynk-py-examples]** Check them all to get famili
 - [08_blynk_timer.py](https://github.com/blynkkk/lib-python/blob/master/examples/08_blynk_timer.py): How send data periodically from hardware by using **[Blynk Timer][blynktimer-doc]**
 - [09_sync_virtual_pin.py](https://github.com/blynkkk/lib-python/blob/master/examples/09_sync_virtual_pin.py): How to sync virtual pin states and properties
 - [10_rtc_sync.py](https://github.com/blynkkk/lib-python/blob/master/examples/10_rtc_sync.py): How to perform RTC sync with blynk server 
-- [11_ssl_socket.py](https://github.com/blynkkk/lib-python/blob/master/examples/11_ssl_socket.py): SSL server connection. Feature available only fo cPython. 
+- [11_ssl_socket.py](https://github.com/blynkkk/lib-python/blob/master/examples/11_ssl_socket.py): SSL server connection. Feature supported only by cPython library. 
 
 ##### Raspberry Pi (any):
 Read [Raspberry Pi guide](https://github.com/blynkkk/lib-python/tree/master/examples/raspberry) first.

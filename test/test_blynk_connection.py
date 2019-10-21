@@ -3,7 +3,7 @@ from __future__ import print_function
 import time
 import pytest
 import socket
-from blynklib_cp import Connection, BlynkError, RedirectError
+from blynklib import Connection, BlynkError, RedirectError
 
 
 class TestBlynkConnection:

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys
 import pytest
-from blynklib_cp import Protocol, BlynkError
+from blynklib import Protocol, BlynkError
 
 
 class TestBlynkProtocol:

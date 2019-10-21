@@ -59,7 +59,7 @@
    ```bash
    export AMPY_PORT=/dev/ttyUSB0
    ampy mkdir /lib
-   ampy put blynklib.py /lib/blynklib.py
+   ampy put blynklib_mp.py /lib/blynklib_mp.py
    ampy put test.py test.py
    ampy run test.py
    ```
@@ -87,17 +87,17 @@ For **.mpy** file compilation you need:
    ```
  - compile source code and get .mpy file
    ```bash
-   ./mpy-cross -X heapsize=2812256 blynklib.py
+   ./mpy-cross -X heapsize=2812256 blynklib_mp.py
    ```
  - .mpy files in the same manner can be placed to board libs with **[ampy][micropython-ampy]**
    as usual .py file
    ```bash
-   ampy put blynklib.mpy /lib/blynklib.mpy
+   ampy put blynklib_mp.mpy /lib/blynklib_mp.mpy
    ```
    and then imported within user scripts as usual .py lib
    ```python
    # start of user script
-   import blynklib
+   import blynklib_mp
    ```
 
 ## Wifi Connection

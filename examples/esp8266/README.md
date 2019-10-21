@@ -59,7 +59,7 @@
    ```bash
    export AMPY_PORT=/dev/ttyUSB0
    ampy mkdir /lib
-   ampy put blynklib.py /lib/blynklib.py
+   ampy put blynklib_mp.py /lib/blynklib_mp.py
    ampy put test.py test.py
    ampy run test.py
    ```
@@ -94,7 +94,7 @@ For custom esp8266 firmware build creation:
    ```text
    RUN apt-get update ...
    ...    
-   COPY blynklib.py /micropython/ports/esp8266/modules/blynklib.py
+   COPY blynklib_mp.py /micropython/ports/esp8266/modules/blynklib_mp.py
    USER micropython
    ...
    ```
@@ -103,10 +103,10 @@ For custom esp8266 firmware build creation:
    Build process can take some time ~ 15-40 minutes.
   
  - after firmware created and copied locally - you can try to burn it with **esptool** to your ESP8266 board.
- - connect to board CLI with **rshell** and test **blynklib** availability within **repl**
+ - connect to board CLI with **rshell** and test **blynklib_mp** availability within **repl**
    ```python
-   import blynklib
-   print(blynklib.LOGO)
+   import blynklib_mp
+   print(blynklib_mp.LOGO)
    ``` 
    
 
@@ -118,13 +118,13 @@ Examine [this document][blynk-esp32-readme] to get more details how to compile *
 After *.mpy files can be placed to **/lib** directory of esp8266 board with **ampy** tool. Libraries *.mpy can be simply imported
 in the same manner as standard *.py library
 ```python
-import blynklib
+import blynklib_mp
 ``` 
 
 ***Note!!*** During custom firmware creation your libraries will be converted and adopted to esp8266 environment
 automatically. So you can create custom build and then just copy *.mpy files from docker system to local
 ```bash
-docker cp micropython:/micropython/ports/esp8266/build/frozen_mpy/blynklib.mpy blynklib.mpy
+docker cp micropython:/micropython/ports/esp8266/build/frozen_mpy/blynklib_mp.mpy blynklib_mp.mpy
 ```
 
 

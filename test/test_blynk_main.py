@@ -2,7 +2,7 @@
 from __future__ import print_function
 import socket
 import pytest
-import blynklib_cp as blynklib
+import blynklib
 
 
 class TestBlynk:
