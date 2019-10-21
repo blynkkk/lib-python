@@ -2,9 +2,8 @@
 # Copyright (c) 2015-2019 Volodymyr Shymanskyy.
 # See the file LICENSE for copying permission.
 
-__version__ = '0.2.5'
+__version__ = '0.2.6'
 
-import os
 import socket
 import ssl
 import struct
@@ -147,7 +146,8 @@ class Connection(Protocol):
     _last_ping_time = 0
     _last_send_time = 0
 
-    def __init__(self, token, server='blynk-cloud.com', port=80, ssl_cert=None, heartbeat=10, rcv_buffer=1024, log=stub_log):
+    def __init__(self, token, server='blynk-cloud.com', port=80, ssl_cert=None, heartbeat=10, rcv_buffer=1024,
+                 log=stub_log):
         self.token = token
         self.server = server
         self.port = port
@@ -175,7 +175,7 @@ class Connection(Protocol):
                 d_buff = d_buff[:length]
             return d_buff
         except (IOError, OSError) as err:
-            if str(err) == 'timed out':
+            if 'timed out' in str(err):
                 return b''
             if str(self.EAGAIN) in str(err) or str(self.ETIMEDOUT) in str(err):
                 return b''
@@ -202,16 +202,14 @@ class Connection(Protocol):
             self._socket.connect(socket.getaddrinfo(self.server, self.port)[0][4])
             self._socket.settimeout(self.SOCK_TIMEOUT)
             if self.ssl_cert:
+                # system’s default CA certificates case
+                if self.ssl_cert == "default":
+                    self.ssl_cert = None
                 self.log('Using SSL socket...')
-                if (self.ssl_cert == "default"):
-                    sslContext = ssl.create_default_context()
-                    caFile = os.path.dirname(__file__) + "/certificate/_blynk-cloudcom.crt"
-                    sslContext.load_verify_locations(cafile=caFile)
-                else:
-                    sslContext = ssl.create_default_context(cafile=self.ssl_cert)
-                sslContext.verify_mode = ssl.CERT_REQUIRED
+                ssl_context = ssl.create_default_context(cafile=self.ssl_cert)
+                ssl_context.verify_mode = ssl.CERT_REQUIRED
                 self._socket.settimeout(self.SOCK_SSL_TIMEOUT)
-                self._socket = sslContext.wrap_socket(sock=self._socket, server_hostname=self.server)
+                self._socket = ssl_context.wrap_socket(sock=self._socket, server_hostname=self.server)
             self.log('Connected to blynk server')
         except Exception as g_exc:
             raise BlynkError('Connection with the Blynk server failed: {}'.format(g_exc))

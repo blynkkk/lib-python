@@ -3,7 +3,7 @@ from __future__ import print_function
 import time
 import pytest
 import socket
-from blynklib import Connection, BlynkError, RedirectError
+from blynklib_cp import Connection, BlynkError, RedirectError
 
 
 class TestBlynkConnection:
@@ -11,18 +11,6 @@ class TestBlynkConnection:
     def cb(self):
         connection = Connection('1234', log=print)
         yield connection
-
-    def test_set_socket_timeout_positive(self, cb):
-        in_timeout = 10
-        cb._socket = socket.socket()
-        cb._set_socket_timeout(in_timeout)
-        timeout = cb._socket.gettimeout()
-        assert timeout == in_timeout
-
-    def test_set_socket_timeout_via_poll(self, cb):
-        in_timeout = 10
-        cb._socket = 2222
-        cb._set_socket_timeout(in_timeout)
 
     def test_send(self, cb, mocker):
         cb._socket = socket.socket()
@@ -57,46 +45,40 @@ class TestBlynkConnection:
 
     def test_receive(self, cb, mocker):
         cb._socket = socket.socket()
-        with mocker.patch.object(cb, '_set_socket_timeout', return_value=None):
-            with mocker.patch('socket.socket.recv', return_value=b'12345'):
-                result = cb.receive(10, 1)
-                assert result == b'12345'
+        with mocker.patch('socket.socket.recv', return_value=b'12345'):
+            result = cb.receive(10, 1)
+            assert result == b'12345'
 
     def test_receive_timeout(self, cb, mocker):
         cb._socket = socket.socket()
-        with mocker.patch.object(cb, '_set_socket_timeout', return_value=None):
-            with mocker.patch('socket.socket.recv', side_effect=OSError('timed out')):
-                result = cb.receive(10, 1)
-                assert result == b''
+        with mocker.patch('socket.socket.recv', side_effect=OSError('timed out')):
+            result = cb.receive(10, 1)
+            assert result == b''
 
     def test_receive_timeout_2(self, cb, mocker):
         cb._socket = socket.socket()
-        with mocker.patch.object(cb, '_set_socket_timeout', return_value=None):
-            with mocker.patch('socket.socket.recv', side_effect=socket.timeout('timed out')):
-                result = cb.receive(10, 1)
-                assert result == b''
+        with mocker.patch('socket.socket.recv', side_effect=socket.timeout('timed out')):
+            result = cb.receive(10, 1)
+            assert result == b''
 
     def test_receive_eagain(self, cb, mocker):
         cb._socket = socket.socket()
-        with mocker.patch.object(cb, '_set_socket_timeout', return_value=None):
-            with mocker.patch('socket.socket.recv', side_effect=IOError('[Errno 11]')):
-                result = cb.receive(10, 1)
-                assert result == b''
+        with mocker.patch('socket.socket.recv', side_effect=IOError('[Errno 11]')):
+            result = cb.receive(10, 1)
+            assert result == b''
 
     def test_receive_etimeout(self, cb, mocker):
         cb._socket = socket.socket()
-        with mocker.patch.object(cb, '_set_socket_timeout', return_value=None):
-            with mocker.patch('socket.socket.recv', side_effect=OSError('[Errno 60]')):
-                result = cb.receive(10, 1)
-                assert result == b''
+        with mocker.patch('socket.socket.recv', side_effect=OSError('[Errno 60]')):
+            result = cb.receive(10, 1)
+            assert result == b''
 
     def test_receive_raise_other_oserror(self, cb, mocker):
         cb._socket = socket.socket()
-        with mocker.patch.object(cb, '_set_socket_timeout', return_value=None):
-            with mocker.patch('socket.socket.recv', side_effect=OSError('[Errno 13]')):
-                with pytest.raises(OSError) as os_err:
-                    cb.receive(10, 1)
-                assert '[Errno 13]' in str(os_err.value)
+        with mocker.patch('socket.socket.recv', side_effect=OSError('[Errno 13]')):
+            with pytest.raises(OSError) as os_err:
+                cb.receive(10, 1)
+            assert '[Errno 13]' in str(os_err.value)
 
     def test_is_server_alive_negative(self, cb):
         result = cb.is_server_alive()

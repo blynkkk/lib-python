@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='blynklib',
-    version='0.2.5',
+    version='0.2.6',
     description='Blynk Python/Micropython library',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -15,7 +15,7 @@ setup(
     author_email='antoha.ua@gmail.com',
     setup_requires=['pytest-runner', ],
     tests_require=['pytest', 'pytest-mock', ],
-    py_modules=['blynklib', 'blynktimer'],
+    py_modules=['blynklib_cp', 'blynktimer'],
     classifiers=[
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",

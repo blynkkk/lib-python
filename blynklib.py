@@ -67,7 +67,7 @@ class Protocol(object):
     STATUS_OK = const(200)
     VPIN_MAX_NUM = const(32)
 
-    _msg_id = 0
+    _msg_id = 1
 
     def _get_msg_id(self, **kwargs):
         if 'msg_id' in kwargs:

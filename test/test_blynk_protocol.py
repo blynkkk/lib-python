@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys
 import pytest
-from blynklib import Protocol, BlynkError
+from blynklib_cp import Protocol, BlynkError
 
 
 class TestBlynkProtocol:
@@ -23,7 +23,7 @@ class TestBlynkProtocol:
     def test_get_msg_id_after_loop(self, pb):
         pb._msg_id = 0xFFFF
         msg_id = pb._get_msg_id()
-        assert msg_id == 1
+        assert msg_id == 0
 
     def test_get_msg_id_defined(self, pb):
         pb._msg_id = 0xFFFF
@@ -34,13 +34,13 @@ class TestBlynkProtocol:
         msg_type = 20
         args = ["test", 1234, 745, 'abcde']
         result = pb._pack_msg(msg_type, *args)
-        assert result == b'\x14\x00\x02\x00\x13test\x001234\x00745\x00abcde'
+        assert result == b'\x14\x00\x01\x00\x13test\x001234\x00745\x00abcde'
 
     def test_pack_msg_no_args(self, pb):
         msg_type = 15
         args = []
         result = pb._pack_msg(msg_type, *args)
-        assert result == b'\x0f\x00\x02\x00\x00'
+        assert result == b'\x0f\x00\x01\x00\x00'
 
     def test_pack_msg_unicode(self, pb):
         if sys.version_info[0] == 2:
@@ -49,7 +49,7 @@ class TestBlynkProtocol:
         msg_type = 20
         args = ["ёж"]
         result = pb._pack_msg(msg_type, *args)
-        assert result == b'\x14\x00\x02\x00\x04\xd1\x91\xd0\xb6'
+        assert result == b'\x14\x00\x01\x00\x04\xd1\x91\xd0\xb6'
 
     def test_parse_response_msg_hw(self, pb):
         data = b'\x14\x00\x02\x00\x13test\x001234\x00745\x00abcde'
@@ -99,44 +99,44 @@ class TestBlynkProtocol:
 
     def test_heartbeat_msg(self, pb):
         result = pb.heartbeat_msg(20, 2048)
-        assert result == b'\x11\x00\x02\x00+ver\x000.2.5\x00buff-in\x002048\x00h-beat\x0020\x00dev\x00python'
+        assert result == b'\x11\x00\x01\x00+ver\x000.2.6\x00buff-in\x002048\x00h-beat\x0020\x00dev\x00python'
 
     def test_login_msg(self, pb):
         result = pb.login_msg('1234')
-        assert result == b'\x02\x00\x02\x00\x041234'
+        assert result == b'\x02\x00\x01\x00\x041234'
 
     def test_ping_msg(self, pb):
         result = pb.ping_msg()
-        assert result == b'\x06\x00\x02\x00\x00'
+        assert result == b'\x06\x00\x01\x00\x00'
 
     def test_response_msg(self, pb):
         result = pb.response_msg(202)
-        assert result == b'\x00\x00\x02\x00\x03202'
+        assert result == b'\x00\x00\x01\x00\x03202'
 
     def test_virtual_write_msg(self, pb):
         result = pb.virtual_write_msg(127, 'abc', 123)
-        assert result == b'\x14\x00\x02\x00\x0evw\x00127\x00abc\x00123'
+        assert result == b'\x14\x00\x01\x00\x0evw\x00127\x00abc\x00123'
 
     def test_virtual_sync_msg(self, pb):
         result = pb.virtual_sync_msg(1, 24)
-        assert result == b'\x10\x00\x02\x00\x07vr\x001\x0024'
+        assert result == b'\x10\x00\x01\x00\x07vr\x001\x0024'
 
     def test_email_msg(self, pb):
         result = pb.email_msg('a@b.com', 'Test', 'MSG')
-        assert result == b'\r\x00\x02\x00\x10a@b.com\x00Test\x00MSG'
+        assert result == b'\r\x00\x01\x00\x10a@b.com\x00Test\x00MSG'
 
     def test_tweet_msg(self, pb):
         result = pb.tweet_msg('tweet_msg_test')
-        assert result == b'\x0c\x00\x02\x00\x0etweet_msg_test'
+        assert result == b'\x0c\x00\x01\x00\x0etweet_msg_test'
 
     def test_notify_msg(self, pb):
         result = pb.notify_msg('app_msg_test')
-        assert result == b'\x0e\x00\x02\x00\x0capp_msg_test'
+        assert result == b'\x0e\x00\x01\x00\x0capp_msg_test'
 
     def test_set_property_msg(self, pb):
         result = pb.set_property_msg(10, 'color', '#FF00EE')
-        assert result == b'\x13\x00\x02\x00\x1010\x00color\x00#FF00EE'
+        assert result == b'\x13\x00\x01\x00\x1010\x00color\x00#FF00EE'
 
     def test_internal_msg(self, pb):
         result = pb.internal_msg('rtc', 'sync')
-        assert result == b'\x11\x00\x02\x00\x08rtc\x00sync'
+        assert result == b'\x11\x00\x01\x00\x08rtc\x00sync'
