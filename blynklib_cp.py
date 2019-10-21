@@ -4,9 +4,11 @@
 
 __version__ = '0.2.5'
 
+import os
 import socket
-import time
+import ssl
 import struct
+import time
 
 LOGO = """
         ___  __          __
@@ -198,20 +200,18 @@ class Connection(Protocol):
             self._state = self.CONNECTING
             self._socket = socket.socket()
             self._socket.connect(socket.getaddrinfo(self.server, self.port)[0][4])
-            if (self.ssl_cert is not None):
+            self._socket.settimeout(self.SOCK_TIMEOUT)
+            if self.ssl_cert:
                 self.log('Using SSL socket...')
-                import ssl, os
-                sslContext = ssl.create_default_context()
-                sslContext.verify_mode = ssl.CERT_REQUIRED
                 if (self.ssl_cert == "default"):
+                    sslContext = ssl.create_default_context()
                     caFile = os.path.dirname(__file__) + "/certificate/_blynk-cloudcom.crt"
+                    sslContext.load_verify_locations(cafile=caFile)
                 else:
-                    caFile = self.ssl_cert
-                sslContext.load_verify_locations(cafile=caFile)
+                    sslContext = ssl.create_default_context(cafile=self.ssl_cert)
+                sslContext.verify_mode = ssl.CERT_REQUIRED
                 self._socket.settimeout(self.SOCK_SSL_TIMEOUT)
                 self._socket = sslContext.wrap_socket(sock=self._socket, server_hostname=self.server)
-            else:
-                self._socket.settimeout(self.SOCK_TIMEOUT)
             self.log('Connected to blynk server')
         except Exception as g_exc:
             raise BlynkError('Connection with the Blynk server failed: {}'.format(g_exc))

@@ -118,7 +118,12 @@ blynk = blynklib.Blynk(BLYNK_AUTH)
 # blynk = blynklib.Blynk(BLYNK_AUTH, server='blynk-cloud.com', port=80, ssl=False, heartbeat=10, rcv_buffer=1024, log=print)
 
 # Lib init with hardware SSL connection example
-# blynk = blynklib.Blynk(BLYNK_AUTH, port=443, ssl=True)
+# blynk = blynklib.Blynk(BLYNK_AUTH, port=443, ssl_cert='default')
+# the ssl_cert='default' is for default blynk server (blynk-cloud.com) or self hosted server with Let's Encrypt certificate.
+
+# if you have self hosted server with your own self signed certificate, then you can change ssl_cert with your
+# own CA file. For example if you have CA file in /home/blynk/ca.crt, then the param will be
+# blynk = blynklib.Blynk(BLYNK_AUTH, port=443, ssl_mode='/home/blynk/ca.crt')
 
 # register handler for Virtual Pin V22 reading by Blynk App.
 # when a widget in Blynk App asks Virtual Pin data from server within given configurable interval (1,2,5,10 sec etc) 
