@@ -4,9 +4,11 @@
 
 __version__ = '0.2.5'
 
+import os
 import socket
-import time
+import ssl
 import struct
+import time
 
 LOGO = """
         ___  __          __
@@ -127,6 +129,7 @@ class Protocol(object):
 class Connection(Protocol):
     SOCK_MAX_TIMEOUT = 5
     SOCK_TIMEOUT = 0.05
+    SOCK_SSL_TIMEOUT = 1
     EAGAIN = 11
     ETIMEDOUT = 60
     RETRIES_TX_DELAY = 2
@@ -144,13 +147,14 @@ class Connection(Protocol):
     _last_ping_time = 0
     _last_send_time = 0
 
-    def __init__(self, token, server='blynk-cloud.com', port=80, heartbeat=10, rcv_buffer=1024, log=stub_log):
+    def __init__(self, token, server='blynk-cloud.com', port=80, ssl_cert=None, heartbeat=10, rcv_buffer=1024, log=stub_log):
         self.token = token
         self.server = server
         self.port = port
         self.heartbeat = heartbeat
         self.rcv_buffer = rcv_buffer
         self.log = log
+        self.ssl_cert = ssl_cert
 
     def send(self, data):
         retries = self.RETRIES_TX_MAX_NUM
@@ -197,6 +201,17 @@ class Connection(Protocol):
             self._socket = socket.socket()
             self._socket.connect(socket.getaddrinfo(self.server, self.port)[0][4])
             self._socket.settimeout(self.SOCK_TIMEOUT)
+            if self.ssl_cert:
+                self.log('Using SSL socket...')
+                if (self.ssl_cert == "default"):
+                    sslContext = ssl.create_default_context()
+                    caFile = os.path.dirname(__file__) + "/certificate/_blynk-cloudcom.crt"
+                    sslContext.load_verify_locations(cafile=caFile)
+                else:
+                    sslContext = ssl.create_default_context(cafile=self.ssl_cert)
+                sslContext.verify_mode = ssl.CERT_REQUIRED
+                self._socket.settimeout(self.SOCK_SSL_TIMEOUT)
+                self._socket = sslContext.wrap_socket(sock=self._socket, server_hostname=self.server)
             self.log('Connected to blynk server')
         except Exception as g_exc:
             raise BlynkError('Connection with the Blynk server failed: {}'.format(g_exc))
