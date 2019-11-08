@@ -64,6 +64,8 @@ You can run unit tests for cPython version of library (blynklib.py) using the co
 
     python setup.py test
 
+**NOTE** Blynklib version <0.2.6 should use pytest-mock<1.11.2. In version 1.11.2 were added restrictions for context manager usage
+
 **NOTE:** Unit tests for Micropython ENV are not available yet.
 
 #### Micropython installation

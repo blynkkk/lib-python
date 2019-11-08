@@ -32,7 +32,7 @@ class TestBlynkProtocol:
 
     def test_pack_msg(self, pb):
         msg_type = 20
-        args = ["test", 1234, 745, 'abcde']
+        args = ['test', 1234, 745, 'abcde']
         result = pb._pack_msg(msg_type, *args)
         assert result == b'\x14\x00\x01\x00\x13test\x001234\x00745\x00abcde'
 
@@ -47,7 +47,7 @@ class TestBlynkProtocol:
             pytest.skip('Python2 unicode compatibility issue')
 
         msg_type = 20
-        args = ["ёж"]
+        args = ['ёж']
         result = pb._pack_msg(msg_type, *args)
         assert result == b'\x14\x00\x01\x00\x04\xd1\x91\xd0\xb6'
 

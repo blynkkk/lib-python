@@ -202,7 +202,7 @@ class Connection(Protocol):
             self._socket.connect(socket.getaddrinfo(self.server, self.port)[0][4])
             self._socket.settimeout(self.SOCK_TIMEOUT)
             if self.ssl_cert:
-                # system’s default CA certificates case
+                # system default CA certificates case
                 if self.ssl_cert == "default":
                     self.ssl_cert = None
                 self.log('Using SSL socket...')
