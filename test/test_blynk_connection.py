@@ -14,71 +14,71 @@ class TestBlynkConnection:
 
     def test_send(self, cb, mocker):
         cb._socket = socket.socket()
-        with mocker.patch('socket.socket.send', return_value=5):
-            result = cb.send('1234')
-            assert result == 5
+        mocker.patch('socket.socket.send', return_value=5)
+        result = cb.send('1234')
+        assert result == 5
 
     def test_send_ioerror(self, cb, mocker):
         cb._socket = socket.socket()
-        with mocker.patch('socket.socket.send', side_effect=IOError('IO')):
-            result = cb.send('1234')
-            assert result is None
+        mocker.patch('socket.socket.send', side_effect=IOError('IO'))
+        result = cb.send('1234')
+        assert result is None
 
     def test_send_oserror(self, cb, mocker):
         cb._socket = socket.socket()
-        with mocker.patch('socket.socket.send', side_effect=OSError('OS')):
-            result = cb.send('1234')
-            assert result is None
+        mocker.patch('socket.socket.send', side_effect=OSError('OS'))
+        result = cb.send('1234')
+        assert result is None
 
     def test_send_socket_timeout(self, cb, mocker):
         cb._socket = socket.socket()
-        with mocker.patch('socket.socket.send', side_effect=socket.timeout()):
-            result = cb.send('1234')
-            assert result is None
+        mocker.patch('socket.socket.send', side_effect=socket.timeout())
+        result = cb.send('1234')
+        assert result is None
 
     def test_send_error_retry_count(self, cb, mocker):
         cb._socket = socket.socket()
-        with mocker.patch('socket.socket.send', side_effect=OSError('OS')):
-            mocker.spy(time, 'sleep')
-            cb.send('1234')
-            assert cb._socket.send.call_count == 3
+        mocker.patch('socket.socket.send', side_effect=OSError('OS'))
+        mocker.spy(time, 'sleep')
+        cb.send('1234')
+        assert cb._socket.send.call_count == 3
 
     def test_receive(self, cb, mocker):
         cb._socket = socket.socket()
-        with mocker.patch('socket.socket.recv', return_value=b'12345'):
-            result = cb.receive(10, 1)
-            assert result == b'12345'
+        mocker.patch('socket.socket.recv', return_value=b'12345')
+        result = cb.receive(10, 1)
+        assert result == b'12345'
 
     def test_receive_timeout(self, cb, mocker):
         cb._socket = socket.socket()
-        with mocker.patch('socket.socket.recv', side_effect=OSError('timed out')):
-            result = cb.receive(10, 1)
-            assert result == b''
+        mocker.patch('socket.socket.recv', side_effect=OSError('timed out'))
+        result = cb.receive(10, 1)
+        assert result == b''
 
     def test_receive_timeout_2(self, cb, mocker):
         cb._socket = socket.socket()
-        with mocker.patch('socket.socket.recv', side_effect=socket.timeout('timed out')):
-            result = cb.receive(10, 1)
-            assert result == b''
+        mocker.patch('socket.socket.recv', side_effect=socket.timeout('timed out'))
+        result = cb.receive(10, 1)
+        assert result == b''
 
     def test_receive_eagain(self, cb, mocker):
         cb._socket = socket.socket()
-        with mocker.patch('socket.socket.recv', side_effect=IOError('[Errno 11]')):
-            result = cb.receive(10, 1)
-            assert result == b''
+        mocker.patch('socket.socket.recv', side_effect=IOError('[Errno 11]'))
+        result = cb.receive(10, 1)
+        assert result == b''
 
     def test_receive_etimeout(self, cb, mocker):
         cb._socket = socket.socket()
-        with mocker.patch('socket.socket.recv', side_effect=OSError('[Errno 60]')):
-            result = cb.receive(10, 1)
-            assert result == b''
+        mocker.patch('socket.socket.recv', side_effect=OSError('[Errno 60]'))
+        result = cb.receive(10, 1)
+        assert result == b''
 
     def test_receive_raise_other_oserror(self, cb, mocker):
         cb._socket = socket.socket()
-        with mocker.patch('socket.socket.recv', side_effect=OSError('[Errno 13]')):
-            with pytest.raises(OSError) as os_err:
-                cb.receive(10, 1)
-            assert '[Errno 13]' in str(os_err.value)
+        mocker.patch('socket.socket.recv', side_effect=OSError('[Errno 13]'))
+        with pytest.raises(OSError) as os_err:
+            cb.receive(10, 1)
+        assert '[Errno 13]' in str(os_err.value)
 
     def test_is_server_alive_negative(self, cb):
         result = cb.is_server_alive()
@@ -103,17 +103,17 @@ class TestBlynkConnection:
         assert result is True
 
     def test_get_socket(self, cb, mocker):
-        with mocker.patch('socket.socket'):
-            with mocker.patch('socket.getaddrinfo'):
-                cb._get_socket()
-                assert cb._state == cb.CONNECTING
+        mocker.patch('socket.socket')
+        mocker.patch('socket.getaddrinfo')
+        cb._get_socket()
+        assert cb._state == cb.CONNECTING
 
     def test_get_socket_exception(self, cb, mocker):
-        with mocker.patch('socket.socket'):
-            with mocker.patch('socket.getaddrinfo', side_effect=BlynkError('BE')):
-                with pytest.raises(BlynkError) as b_err:
-                    cb._get_socket()
-                assert 'Connection with the Blynk server failed: BE' in str(b_err.value)
+        mocker.patch('socket.socket')
+        mocker.patch('socket.getaddrinfo', side_effect=BlynkError('BE'))
+        with pytest.raises(BlynkError) as b_err:
+            cb._get_socket()
+        assert 'Connection with the Blynk server failed: BE' in str(b_err.value)
 
     def test_authenticate(self, cb, mocker):
         mocker.patch.object(cb, 'send', return_value=None)

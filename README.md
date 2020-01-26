@@ -173,6 +173,8 @@ Examples can be found **[here][blynk-py-examples]** Check them all to get famili
 - [09_sync_virtual_pin.py](https://github.com/blynkkk/lib-python/blob/master/examples/09_sync_virtual_pin.py): How to sync virtual pin states and properties
 - [10_rtc_sync.py](https://github.com/blynkkk/lib-python/blob/master/examples/10_rtc_sync.py): How to perform RTC sync with blynk server 
 - [11_ssl_socket.py](https://github.com/blynkkk/lib-python/blob/master/examples/11_ssl_socket.py): SSL server connection. Feature supported only by cPython library. 
+- [12_app_connect_disconnect.py](https://github.com/blynkkk/lib-python/blob/master/examples/12_app_connect_disconnect.py): Managing APP connect/disconnect events with Blynk Cloud. 
+
 
 ##### Raspberry Pi (any):
 Read [Raspberry Pi guide](https://github.com/blynkkk/lib-python/tree/master/examples/raspberry) first.

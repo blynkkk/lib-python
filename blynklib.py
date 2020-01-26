@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Anton Morozenko
+# Copyright (c) 2019-2020 Anton Morozenko
 # Copyright (c) 2015-2019 Volodymyr Shymanskyy.
 # See the file LICENSE for copying permission.
 
@@ -348,7 +348,7 @@ class Blynk(Connection):
         elif msg_type == self.MSG_PING:
             self.send(self.response_msg(self.STATUS_OK, msg_id=msg_id))
         elif msg_type in (self.MSG_HW, self.MSG_BRIDGE, self.MSG_INTERNAL):
-            if msg_type == self.MSG_INTERNAL and len(msg_args) >= 2:
+            if msg_type == self.MSG_INTERNAL:
                 self.call_handler("{}{}".format(self._INTERNAL, msg_args[0]), msg_args[1:])
             elif len(msg_args) >= 3 and msg_args[0] == 'vw':
                 self.call_handler("{}{}".format(self._VPIN_WRITE, msg_args[1]), int(msg_args[1]), msg_args[2:])
