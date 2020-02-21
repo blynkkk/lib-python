@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Anton Morozenko
+# Copyright (c) 2019-2020 Anton Morozenko
 """
 Polling timers for functions.
 Registers timers and performs run once or periodical function execution after defined time intervals.

@@ -15,7 +15,7 @@ setup(
     author_email='antoha.ua@gmail.com',
     setup_requires=['pytest-runner', ],
     tests_require=['pytest', 'pytest-mock>=1.11.2', ],
-    py_modules=['blynklib', 'blynktimer'],
+    py_modules=['blynklib', 'blynktimer', 'blynklib_mp'],
     classifiers=[
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
