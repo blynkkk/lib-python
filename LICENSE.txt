@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2019 Anton Morozenko
+Copyright (c) 2019-2020 Anton Morozenko
 Copyright (c) 2015-2019 Volodymyr Shymanskyy
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
