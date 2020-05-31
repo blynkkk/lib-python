@@ -345,8 +345,8 @@ class Blynk(Connection):
                 self.call_handler("{}{}".format(self._VPIN_READ, msg_args[1]), int(msg_args[1]))
 
     def read_response(self, timeout=0.5):
-        end_time = time.time() + timeout
-        while time.time() <= end_time:
+        end_time = time.ticks_ms() + int(timeout * const(1000))
+        while time.ticks_diff(end_time, time.ticks_ms()) > 0:
             rsp_data = self.receive(self.rcv_buffer, self.SOCK_TIMEOUT)
             if rsp_data:
                 self._last_rcv_time = ticks_ms()
