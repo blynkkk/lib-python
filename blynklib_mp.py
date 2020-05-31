@@ -151,9 +151,12 @@ class Connection(Protocol):
         self.log = log
 
     def _set_socket_timeout(self, timeout):
-        p = select.poll()
-        p.register(self._socket)
-        p.poll(int(timeout * const(1000)))
+        if getattr(self._socket, 'settimeout', None):
+            self._socket.settimeout(timeout)
+        else:
+            p = select.poll()
+            p.register(self._socket)
+            p.poll(int(timeout * const(1000)))
 
     def send(self, data):
         retries = self.RETRIES_TX_MAX_NUM
