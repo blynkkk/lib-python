@@ -186,9 +186,9 @@ class Connection(Protocol):
     def is_server_alive(self):
         now = ticks_ms()
         h_beat_ms = self.heartbeat * const(1000)
-        rcv_delta = now - self._last_rcv_time
-        ping_delta = now - self._last_ping_time
-        send_delta = now - self._last_send_time
+        rcv_delta = time.ticks_diff(now, self._last_rcv_time)
+        ping_delta = time.ticks_diff(now, self._last_ping_time)
+        send_delta = time.ticks_diff(now, self._last_send_time)
         if rcv_delta > h_beat_ms + (h_beat_ms // const(2)):
             return False
         if (ping_delta > h_beat_ms // const(10)) and (send_delta > h_beat_ms or rcv_delta > h_beat_ms):
