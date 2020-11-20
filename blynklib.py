@@ -65,7 +65,7 @@ class Protocol(object):
         if 'msg_id' in kwargs:
             return kwargs['msg_id']
         self._msg_id += 1
-        return self._msg_id if self._msg_id <= 0xFFFF else 0
+        return self._msg_id if self._msg_id <= 0xFFFF else 1
 
     def _pack_msg(self, msg_type, *args, **kwargs):
         data = ('\0'.join([str(curr_arg) for curr_arg in args])).encode('utf-8')
