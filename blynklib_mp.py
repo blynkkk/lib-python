@@ -5,7 +5,6 @@
 __version__ = '0.2.6'
 
 import usocket as socket
-import ussl as ssl
 import utime as time
 import ustruct as struct
 import uselect as select
@@ -126,7 +125,6 @@ class Protocol(object):
 class Connection(Protocol):
     SOCK_MAX_TIMEOUT = const(5)
     SOCK_TIMEOUT = 0.05
-    SOCK_SSL_TIMEOUT = const(1)
     EAGAIN = const(11)
     ETIMEDOUT = const(60)
     RETRIES_TX_DELAY = const(2)
@@ -166,11 +164,7 @@ class Connection(Protocol):
             try:
                 retries -= 1
                 self._last_send_time = ticks_ms()
-                try:
-                    bytes_written = self._socket.send(data)
-                except AttributeError:
-                    bytes_written = self._socket.write(data)
-                return bytes_written
+                return self._socket.send(data)
             except (IOError, OSError):
                 sleep_ms(self.RETRIES_TX_DELAY)
 
@@ -178,16 +172,7 @@ class Connection(Protocol):
         d_buff = b''
         try:
             self._set_socket_timeout(timeout)
-            try:
-                d_buff += self._socket.recv(length)
-            except AttributeError:
-                timeout = self.SOCK_SSL_TIMEOUT
-                while not d_buff and timeout > 0:
-                    ret = self._socket.read(length)
-                    if ret:
-                        d_buff += ret
-                    timeout -= self.SOCK_TIMEOUT
-                    time.sleep(self.SOCK_TIMEOUT)
+            d_buff += self._socket.recv(length)
             if len(d_buff) >= length:
                 d_buff = d_buff[:length]
             return d_buff
@@ -218,13 +203,6 @@ class Connection(Protocol):
             self._socket = socket.socket()
             self._socket.connect(socket.getaddrinfo(self.server, self.port)[0][-1])
             self._set_socket_timeout(self.SOCK_TIMEOUT)
-            if self.port == 443 or self.port == 8443:
-                self.log('Using SSL socket...')
-                self._socket = ssl.wrap_socket(self._socket)
-                # Short reads are not supported in ssl mode. We work around
-                # this by setting the socket non blocking and doing manual
-                # polling/timeout.
-                self._socket.setblocking(False)
             self.log('Connected to server')
         except Exception as g_exc:
             raise BlynkError('Server connection failed: {}'.format(g_exc))
