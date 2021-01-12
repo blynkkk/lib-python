@@ -293,6 +293,7 @@ class Blynk:
         self.connection._state = self.connection.DISCONNECTED
         if err_msg:
             self.connection.log('[ERROR]: {}\nConnection closed'.format(err_msg))
+        self.connection._msg_id = 0
         time.sleep(self.connection.RECONNECT_SLEEP)
 
     def virtual_write(self, v_pin, *val):
