@@ -70,9 +70,10 @@ class Protocol(object):
 
     def parse_response(self, rsp_data, msg_buffer):
         msg_args = []
-        msg_tail = b''
+        msg_len = 0
         try:
             msg_type, msg_id, h_data = struct.unpack('!BHH', rsp_data[:self.MSG_HEAD_LEN])
+            msg_len = self.MSG_HEAD_LEN + h_data
         except Exception as p_err:
             raise BlynkError('Message parse error: {}'.format(p_err))
         if msg_id == 0:
@@ -82,12 +83,11 @@ class Protocol(object):
         elif msg_type in (self.MSG_RSP, self.MSG_PING):
             pass
         elif msg_type in (self.MSG_HW, self.MSG_BRIDGE, self.MSG_INTERNAL, self.MSG_REDIRECT):
-            msg_body = rsp_data[self.MSG_HEAD_LEN: self.MSG_HEAD_LEN + h_data]
+            msg_body = rsp_data[self.MSG_HEAD_LEN: msg_len]
             msg_args = [itm.decode('utf-8') for itm in msg_body.split(b'\0')]
-            msg_tail = rsp_data[self.MSG_HEAD_LEN + h_data:]
         else:
             raise BlynkError("Unknown message type: '{}'".format(msg_type))
-        return msg_type, msg_id, h_data, msg_args, msg_tail
+        return msg_type, msg_id, h_data, msg_args, msg_len
 
     def heartbeat_msg(self, heartbeat, rcv_buffer):
         return self._pack_msg(self.MSG_INTERNAL, 'ver', __version__, 'buff-in', rcv_buffer, 'h-beat', heartbeat,
@@ -356,8 +356,9 @@ class Blynk(Connection):
             if rsp_data:
                 self._last_rcv_time = ticks_ms()
                 while rsp_data:
-                    msg_type, msg_id, h_data, msg_args, rsp_data = self.parse_response(rsp_data, self.rcv_buffer)
+                    msg_type, msg_id, h_data, msg_args, msg_len = self.parse_response(rsp_data, self.rcv_buffer)
                     self.process(msg_type, msg_id, h_data, msg_args)
+                    rsp_data = rsp_data[msg_len:]
 
     def run(self):
         if not self.connected():
