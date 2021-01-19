@@ -70,8 +70,10 @@ class Protocol(object):
 
     def parse_response(self, rsp_data, msg_buffer):
         msg_args = []
+        msg_len = 0
         try:
             msg_type, msg_id, h_data = struct.unpack('!BHH', rsp_data[:self.MSG_HEAD_LEN])
+            msg_len = self.MSG_HEAD_LEN + h_data
         except Exception as p_err:
             raise BlynkError('Message parse error: {}'.format(p_err))
         if msg_id == 0:
@@ -81,11 +83,11 @@ class Protocol(object):
         elif msg_type in (self.MSG_RSP, self.MSG_PING):
             pass
         elif msg_type in (self.MSG_HW, self.MSG_BRIDGE, self.MSG_INTERNAL, self.MSG_REDIRECT):
-            msg_body = rsp_data[self.MSG_HEAD_LEN: self.MSG_HEAD_LEN + h_data]
+            msg_body = rsp_data[self.MSG_HEAD_LEN: msg_len]
             msg_args = [itm.decode('utf-8') for itm in msg_body.split(b'\0')]
         else:
             raise BlynkError("Unknown message type: '{}'".format(msg_type))
-        return msg_type, msg_id, h_data, msg_args
+        return msg_type, msg_id, h_data, msg_args, msg_len
 
     def heartbeat_msg(self, heartbeat, rcv_buffer):
         return self._pack_msg(self.MSG_INTERNAL, 'ver', __version__, 'buff-in', rcv_buffer, 'h-beat', heartbeat,
@@ -214,7 +216,7 @@ class Connection(Protocol):
         rsp_data = self.receive(self.rcv_buffer, self.SOCK_MAX_TIMEOUT)
         if not rsp_data:
             raise BlynkError('Auth stage timeout')
-        msg_type, _, status, args = self.parse_response(rsp_data, self.rcv_buffer)
+        msg_type, _, status, args, _ = self.parse_response(rsp_data, self.rcv_buffer)
         if status != self.STATUS_OK:
             if status == self.STATUS_INVALID_TOKEN:
                 raise BlynkError('Invalid Auth Token')
@@ -229,7 +231,7 @@ class Connection(Protocol):
         rcv_data = self.receive(self.rcv_buffer, self.SOCK_MAX_TIMEOUT)
         if not rcv_data:
             raise BlynkError('Heartbeat stage timeout')
-        _, _, status, _ = self.parse_response(rcv_data, self.rcv_buffer)
+        _, _, status, _, _ = self.parse_response(rcv_data, self.rcv_buffer)
         if status != self.STATUS_OK:
             raise BlynkError('Set heartbeat returned code={}'.format(status))
         self.log('Heartbeat = {} sec. MaxCmdBuffer = {} bytes'.format(self.heartbeat, self.rcv_buffer))
@@ -353,8 +355,10 @@ class Blynk(Connection):
             rsp_data = self.receive(self.rcv_buffer, self.SOCK_TIMEOUT)
             if rsp_data:
                 self._last_rcv_time = ticks_ms()
-                msg_type, msg_id, h_data, msg_args = self.parse_response(rsp_data, self.rcv_buffer)
-                self.process(msg_type, msg_id, h_data, msg_args)
+                while rsp_data:
+                    msg_type, msg_id, h_data, msg_args, msg_len = self.parse_response(rsp_data, self.rcv_buffer)
+                    self.process(msg_type, msg_id, h_data, msg_args)
+                    rsp_data = rsp_data[msg_len:]
 
     def run(self):
         if not self.connected():
