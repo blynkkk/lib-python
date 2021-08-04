@@ -201,13 +201,9 @@ Read [this document][esp8266-readme] to get more information.
 
 ## Documentation and other helpful links
 
-[Full Blynk Documentation](http://docs.blynk.cc/#blynk-firmware) - a complete guide on Blynk features
+[Full Blynk Documentation](https://docs.blynk.io) - a complete guide on Blynk features
 
-[Community (Forum)](http://community.blynk.cc) - join a 500,000 Blynk community to ask questions and share ideas
-
-[Help Center](http://help.blynk.cc) - helpful articles on various Blynk aspects
-
-[Code Examples Browser](http://examples.blynk.cc) - browse examples to explore Blynk possibilities
+[Community (Forum)](https://community.blynk.cc) - join a 1'000'000 Blynk community to ask questions and share ideas
 
 [Official Website](https://blynk.io) 
 
@@ -226,7 +222,7 @@ Read [this document][esp8266-readme] to get more information.
 * [Lua, OpenWrt, NodeMCU](https://github.com/vshymanskyy/blynk-library-lua)
 * [OpenWrt packages](https://github.com/vshymanskyy/blynk-library-openwrt)
 * [MBED](https://developer.mbed.org/users/vshymanskyy/code/Blynk/)
-* [Node-RED](https://www.npmjs.com/package/node-red-contrib-blynk-ws)
+* [Node-RED for Blynk IoT](https://flows.nodered.org/node/node-red-contrib-blynk-iot)
 * [LabVIEW](https://github.com/juncaofish/NI-LabVIEWInterfaceforBlynk)
 * [C#](https://github.com/sverrefroy/BlynkLibrary)
 
