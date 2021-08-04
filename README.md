@@ -248,8 +248,8 @@ This project is released under The MIT License (MIT)
   [blynk-server-public]: http://blynk-cloud.com
   [blynk-docs]: https://docs.blynk.cc/
   [blynk-py-examples]: https://github.com/blynkkk/lib-python/blob/master/examples
-  [blynk-app-android]: https://play.google.com/store/apps/details?id=cc.blynk
-  [blynk-app-ios]: https://itunes.apple.com/us/app/blynk-control-arduino-raspberry/id808760481?ls=1&mt=8
+  [blynk-app-android]: https://play.google.com/store/apps/details?id=cloud.blynk
+  [blynk-app-ios]: https://apps.apple.com/us/app/blynk-iot/id1559317868
   [blynk-vpins]: http://help.blynk.cc/getting-started-library-auth-token-code-examples/blynk-basics/what-is-virtual-pins
   [python-org]: https://www.python.org/downloads/
   [micropython-org]: https://micropython.org/ 
