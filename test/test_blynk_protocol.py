@@ -23,7 +23,7 @@ class TestBlynkProtocol:
     def test_get_msg_id_after_loop(self, pb):
         pb._msg_id = 0xFFFF
         msg_id = pb._get_msg_id()
-        assert msg_id == 0
+        assert msg_id == 1
 
     def test_get_msg_id_defined(self, pb):
         pb._msg_id = 0xFFFF
