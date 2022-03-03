@@ -1,3 +1,5 @@
+![StandWithUkraine banner](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner.svg)
+
 # Blynk Python Library
 This library provides API to connect IoT hardware that supports Micropython/Python to Blynk Cloud and communiate with Blynk apps (iOS and Android). You can send raw and processed sensor data and remotely control anything that is connected to your hardware (relays, motors, servos) from anywhere in the world.  
 
