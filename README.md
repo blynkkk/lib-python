@@ -1,4 +1,8 @@
-[![SWUbanner](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner-direct.svg)](https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/README.md)
+> [!IMPORTANT]
+> **This project has been archived and is no longer maintained.**  
+> No further updates or support will be provided.  
+> We recommend switching to the **Blynk MQTT API** for future development.  
+> You can explore some [useful examples here](https://github.com/Blynk-Technologies/Blynk-MQTT-Samples).
 
 # Blynk Python Library
 This library provides API to connect IoT hardware that supports Micropython/Python to Blynk Cloud and communiate with Blynk apps (iOS and Android). You can send raw and processed sensor data and remotely control anything that is connected to your hardware (relays, motors, servos) from anywhere in the world.  
